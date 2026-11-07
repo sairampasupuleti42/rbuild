@@ -1,0 +1,11 @@
+{
+  "name": "rBuild - Construction Estimator",
+  "short_name": "rBuild",
+  "description": "Indian Building Construction Material Estimator",
+  "theme_color": "#0284c7",
+  "background_color": "#0f172a",
+  "display": "standalone",
+  "orientation": "portrait",
+  "scope": "/",
+  "start_url": "/"
+}
