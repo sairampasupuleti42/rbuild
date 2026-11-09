@@ -35,9 +35,9 @@ export class AppComponent {
   estimates = computed<MaterialItem[]>(() => {
     const area = this.totalBuiltUpArea();
 
-    // 1. Cement: 0.84 bags of 25kg per sft (Equivalent to ~0.42 standard 50kg bags/sft)
+    // 1. Cement: ~0.42 standard 50kg bags per sft
+    const cement50kg = Math.round(area * 0.42);
     const cement25kg = Math.round(area * 0.84);
-    const cement50kg = Math.round(cement25kg / 2);
 
     // 2. Steel: ~3.8 kg per sft (0.0038 MT/sft)
     const steelKg = Math.round(area * 3.8);
@@ -60,13 +60,13 @@ export class AppComponent {
     return [
       {
         id: 'cement',
-        name: 'Cement Bags (25 kg)',
+        name: 'Cement Bags (50 kg)',
         category: 'Binding & Masonry',
-        primaryQty: cement25kg,
-        primaryUnit: 'Bags (25kg)',
-        secondaryQty: cement50kg,
-        secondaryUnit: 'Std 50kg Bags',
-        laymanVehicle: `~${Math.ceil(cement25kg / 350)} Mini-lorry / Tempo trips`,
+        primaryQty: cement50kg,
+        primaryUnit: 'Bags (50kg)',
+        secondaryQty: cement25kg,
+        secondaryUnit: '25kg Bag Equivalent',
+        laymanVehicle: `~${Math.ceil(cement50kg / 175)} Mini-lorry / Tempo trips`,
         badge: 'Requested Metric',
         icon: '🧱',
         tip: 'Covers foundation footing, columns, beams, RCC slab casting, and wall plaster.'
@@ -125,6 +125,12 @@ export class AppComponent {
       }
     ];
   });
+
+  resetForm(): void {
+    this.plotAreaSft.set(1200);
+    this.floors.set(2);
+    this.brickType.set('clay');
+  }
 
   print(): void {
     window.print();
