@@ -2,8 +2,8 @@
   "name": "rbuild",
   "version": "1.0.0",
   "scripts": {
-    "build": "ng build --configuration production",
-    "deploy": "firebase deploy --only hosting"
+    "build": "ng build --configuration production && node scripts/stamp-build-time.mjs",
+    "deploy": "npm run build && firebase deploy --only hosting"
   },
   "dependencies": {
     "@angular/common": "^18.2.0",

@@ -16,6 +16,19 @@ export interface MaterialItem {
   tip: string;
 }
 
+interface ChecklistItem {
+  id: string;
+  text: string;
+  checked: boolean;
+}
+
+interface ChecklistPhase {
+  id: string;
+  title: string;
+  standard?: string;
+  items: ChecklistItem[];
+}
+
 @Component({
   selector: 'app-root',
   standalone: true,
@@ -27,6 +40,63 @@ export class AppComponent {
   plotAreaSft = signal<number>(1200);
   floors = signal<number>(2);
   brickType = signal<'clay' | 'cement'>('clay');
+  checklist = signal<ChecklistPhase[]>([
+    {
+      id: 'planning',
+      title: 'Planning and setting out',
+      items: [
+        { id: 'approved-drawings', text: 'Keep current, approved architectural and structural drawings and local permissions available on site.', checked: false },
+        { id: 'soil-design', text: 'Confirm the foundation design is based on the site soil investigation; refer unexpected soil, water, or nearby-structure conditions to the engineer before proceeding.', checked: false },
+        { id: 'site-setting-out', text: 'Verify plot boundaries, building lines, grid lines, levels, and underground services against the approved drawings before excavation.', checked: false }
+      ]
+    },
+    {
+      id: 'foundation',
+      title: 'Excavation and foundation',
+      items: [
+        { id: 'excavation-review', text: 'Check excavation dimensions and founding stratum against the drawings; obtain the engineer’s approval before covering the foundation bed.', checked: false },
+        { id: 'foundation-rebar', text: 'Before the pour, check reinforcement size, spacing, laps, anchorage, cover, and formwork against structural drawings.', checked: false },
+        { id: 'foundation-record', text: 'Record concrete delivery or batch details, inspection, testing, and curing for the foundation work.', checked: false }
+      ]
+    },
+    {
+      id: 'reinforced-concrete',
+      title: 'Reinforced concrete frame',
+      standard: 'IS 456, IS 10262, IS 383, IS 1786',
+      items: [
+        { id: 'material-documents', text: 'Check cement, reinforcement, and aggregate deliveries against project specifications; retain required certificates and test records.', checked: false },
+        { id: 'rebar-inspection', text: 'Before each pour, verify reinforcement, cover blocks, formwork dimensions and stability, and all planned sleeves or embedded services against the drawings.', checked: false },
+        { id: 'approved-mix', text: 'Use the approved concrete mix and batching method; do not add water at site without authorization.', checked: false },
+        { id: 'concrete-placement', text: 'Place and compact concrete using the approved method; use only approved construction-joint locations and record required fresh-concrete and strength tests.', checked: false },
+        { id: 'concrete-curing', text: 'Protect and cure concrete as specified; keep curing and test records, and remove formwork only when authorized.', checked: false }
+      ]
+    },
+    {
+      id: 'masonry-waterproofing',
+      title: 'Masonry and waterproofing',
+      standard: 'IS 1077 (burnt clay bricks), IS 2185 (Part 1) (concrete masonry units)',
+      items: [
+        { id: 'masonry-units', text: 'Check masonry units against the specified type, dimensions, condition, and required test or product documents.', checked: false },
+        { id: 'masonry-work', text: 'Follow the specified mortar and unit preparation; check wall line, level, plumb, joints, openings, and lintels as work proceeds.', checked: false },
+        { id: 'waterproofing', text: 'Inspect waterproofing substrate, junctions, upstands, outlets, and falls; complete the specified leak test before covering the work.', checked: false }
+      ]
+    },
+    {
+      id: 'services-handover',
+      title: 'Services and handover',
+      items: [
+        { id: 'concealed-services', text: 'Complete and record required plumbing leak/pressure tests and electrical checks before concealing pipes, wiring, or conduits.', checked: false },
+        { id: 'final-drainage', text: 'Check wet-area and roof drainage, slopes, and specified water tests before finishes and handover.', checked: false },
+        { id: 'handover-records', text: 'Collect inspection and test records, approved changes, as-built drawings, product documents, and applicable completion or occupancy approvals.', checked: false }
+      ]
+    }
+  ]);
+  completedChecklistItems = computed(() =>
+    this.checklist().reduce((total, phase) => total + phase.items.filter(item => item.checked).length, 0)
+  );
+  totalChecklistItems = computed(() =>
+    this.checklist().reduce((total, phase) => total + phase.items.length, 0)
+  );
 
   // Total Slab / Built-up Area
   totalBuiltUpArea = computed(() => (this.plotAreaSft() || 0) * (this.floors() || 1));
@@ -130,6 +200,14 @@ export class AppComponent {
     this.plotAreaSft.set(1200);
     this.floors.set(2);
     this.brickType.set('clay');
+  }
+
+  toggleChecklistItem(phaseId: string, itemId: string): void {
+    this.checklist.update(phases => phases.map(phase =>
+      phase.id === phaseId
+        ? { ...phase, items: phase.items.map(item => item.id === itemId ? { ...item, checked: !item.checked } : item) }
+        : phase
+    ));
   }
 
   print(): void {

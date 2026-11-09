@@ -12,6 +12,11 @@
 </head>
 <body class="bg-slate-900 text-slate-100 antialiased selection:bg-sky-500 selection:text-white">
   <app-root></app-root>
+  <footer class="py-3 text-center text-xs text-slate-500">
+    Build / deployment time:
+    <time id="deployment-time">__BUILD_TIMESTAMP__</time>
+    IST
+  </footer>
   <script>
     if ('serviceWorker' in navigator) {
       navigator.serviceWorker.register('sw.js').catch(console.error);

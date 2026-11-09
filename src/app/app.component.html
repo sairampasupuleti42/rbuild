@@ -98,4 +98,48 @@
       </p>
     </section>
   </section>
+
+  <section class="mt-10" aria-labelledby="checklist-heading">
+    <div class="mb-5 flex flex-wrap items-end justify-between gap-3">
+      <div>
+        <p class="text-sm font-semibold uppercase tracking-[0.15em] text-sky-400">Site guide</p>
+        <h2 id="checklist-heading" class="mt-1 text-2xl font-bold text-white">House construction checklist</h2>
+        <p class="mt-2 max-w-3xl text-sm text-slate-400">
+          Work through these checks with your contractor and structural engineer. Progress:
+          {{ completedChecklistItems() }} of {{ totalChecklistItems() }} complete.
+        </p>
+      </div>
+    </div>
+
+    <div class="grid gap-4 md:grid-cols-2">
+      @for (phase of checklist(); track phase.id) {
+        <article class="rounded-2xl border border-slate-700 bg-slate-800 p-5 shadow-lg">
+          <h3 class="font-semibold text-white">{{ phase.title }}</h3>
+          @if (phase.standard) {
+            <p class="mt-1 text-xs text-sky-300">Relevant BIS references: {{ phase.standard }}</p>
+          }
+          <ul class="mt-4 space-y-3">
+            @for (item of phase.items; track item.id) {
+              <li>
+                <label class="flex cursor-pointer items-start gap-3 text-sm leading-relaxed text-slate-300">
+                  <input
+                    class="mt-1 h-4 w-4 shrink-0 accent-sky-400"
+                    type="checkbox"
+                    [checked]="item.checked"
+                    (change)="toggleChecklistItem(phase.id, item.id)">
+                  <span [class.line-through]="item.checked" [class.text-slate-500]="item.checked">{{ item.text }}</span>
+                </label>
+              </li>
+            }
+          </ul>
+        </article>
+      }
+    </div>
+
+    <p class="mt-4 text-xs leading-relaxed text-slate-500">
+      This practical checklist is not a compliance certificate or construction specification. Follow the approved
+      project drawings, applicable local requirements, and current BIS editions and amendments; confirm site decisions
+      and inspection/testing requirements with the responsible qualified engineer.
+    </p>
+  </section>
 </main>
