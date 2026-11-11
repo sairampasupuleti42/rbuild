@@ -12,6 +12,16 @@
       <h2 class="text-xl font-semibold text-white">Project details</h2>
       <p class="mt-1 text-sm text-slate-400">Enter your plot area and building configuration.</p>
 
+      <label for="city" class="mt-6 block text-sm font-medium text-slate-200">City / local market</label>
+      <input
+        id="city"
+        class="mt-2 w-full rounded-lg border border-slate-600 bg-slate-900 px-4 py-3 text-white outline-none focus:border-sky-400 focus:ring-2 focus:ring-sky-400/30"
+        type="text"
+        placeholder="e.g. Pune, Maharashtra"
+        [ngModel]="city()"
+        (ngModelChange)="city.set($event)"
+        name="city">
+
       <label for="plot-area" class="mt-6 block text-sm font-medium text-slate-200">Plot area (sq. ft.)</label>
       <input
         id="plot-area"
@@ -97,6 +107,84 @@
         soil, structural engineering, and site conditions. Consult a qualified engineer before purchasing materials.
       </p>
     </section>
+  </section>
+
+  <section class="mt-8 rounded-2xl border border-slate-700 bg-slate-800 p-6 shadow-xl" aria-labelledby="cost-heading">
+    <div class="mb-5">
+      <p class="text-sm font-semibold uppercase tracking-[0.15em] text-sky-400">Local budget planner</p>
+      <h2 id="cost-heading" class="mt-1 text-2xl font-bold text-white">Material cost estimate</h2>
+      <p class="mt-2 max-w-3xl text-sm text-slate-400">
+        Enter current supplier quotes for {{ city() || 'your local market' }}. Rates are user-provided; this tool does not
+        fetch live city prices.
+      </p>
+    </div>
+
+    <div class="overflow-x-auto">
+      <table class="w-full min-w-[42rem] text-left text-sm">
+        <thead class="text-xs uppercase tracking-wide text-slate-400">
+          <tr class="border-b border-slate-700">
+            <th class="pb-3 pr-4 font-medium">Material</th>
+            <th class="pb-3 pr-4 font-medium">Estimated quantity</th>
+            <th class="pb-3 pr-4 font-medium">Local rate (₹)</th>
+            <th class="pb-3 text-right font-medium">Estimated cost</th>
+          </tr>
+        </thead>
+        <tbody class="divide-y divide-slate-700">
+          @for (line of materialCostLines(); track line.id) {
+            <tr>
+              <th scope="row" class="py-3 pr-4 font-medium text-slate-200">{{ line.name }}</th>
+              <td class="py-3 pr-4 text-slate-300">{{ line.quantity | number }} {{ line.unit }}</td>
+              <td class="py-3 pr-4">
+                <label class="sr-only" [for]="'rate-' + line.id">{{ line.name }} rate {{ line.rateUnit }}</label>
+                <div class="flex items-center gap-2">
+                  <span class="text-slate-400">₹</span>
+                  <input
+                    class="w-36 rounded-lg border border-slate-600 bg-slate-900 px-3 py-2 text-white outline-none focus:border-sky-400 focus:ring-2 focus:ring-sky-400/30"
+                    [id]="'rate-' + line.id"
+                    type="number"
+                    min="0"
+                    step="any"
+                    [ngModel]="line.rate || null"
+                    (ngModelChange)="updateMaterialRate(line.id, $event || 0)"
+                    [name]="'rate-' + line.id"
+                    [attr.aria-describedby]="'rate-unit-' + line.id">
+                  <span class="whitespace-nowrap text-xs text-slate-400" [id]="'rate-unit-' + line.id">{{ line.rateUnit }}</span>
+                </div>
+              </td>
+              <td class="py-3 text-right font-medium text-slate-200">
+                @if (line.rate > 0) {
+                  {{ line.cost | currency:'INR':'symbol':'1.0-0':'en-IN' }}
+                } @else {
+                  <span class="text-slate-500">Add rate</span>
+                }
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+
+    <div class="mt-5 flex flex-wrap items-end justify-between gap-3 border-t border-slate-700 pt-4">
+      <div>
+        <p class="text-sm text-slate-400">
+          {{ allMaterialRatesEntered() ? 'Estimated material total' : 'Subtotal for materials with rates entered' }}
+        </p>
+        <p class="mt-1 text-2xl font-bold text-sky-300">
+          {{ materialCostTotal() | currency:'INR':'symbol':'1.0-0':'en-IN' }}
+        </p>
+      </div>
+      @if (!allMaterialRatesEntered()) {
+        <p class="max-w-xl text-xs leading-relaxed text-amber-300">
+          Enter a rate for every material to complete the estimate. Total excludes labour, transport, taxes, and other
+          construction costs; confirm quantities and prices with local suppliers and your engineer.
+        </p>
+      } @else {
+        <p class="max-w-xl text-xs leading-relaxed text-slate-400">
+          Indicative material-only budget using the rates you entered. Confirm quantities, wastage, delivery charges,
+          taxes, and current supplier prices before budgeting.
+        </p>
+      }
+    </div>
   </section>
 
   <section class="mt-10" aria-labelledby="checklist-heading">

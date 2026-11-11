@@ -2,8 +2,10 @@ import { Component, signal, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 
+type MaterialRateId = 'cement' | 'steel' | 'sand' | 'stone' | 'bricks';
+
 export interface MaterialItem {
-  id: string;
+  id: MaterialRateId;
   name: string;
   category: string;
   primaryQty: number;
@@ -29,6 +31,16 @@ interface ChecklistPhase {
   items: ChecklistItem[];
 }
 
+interface MaterialCostLine {
+  id: MaterialRateId;
+  name: string;
+  quantity: number;
+  unit: string;
+  rate: number;
+  rateUnit: string;
+  cost: number;
+}
+
 @Component({
   selector: 'app-root',
   standalone: true,
@@ -40,6 +52,21 @@ export class AppComponent {
   plotAreaSft = signal<number>(1200);
   floors = signal<number>(2);
   brickType = signal<'clay' | 'cement'>('clay');
+  city = signal('');
+  materialRates = signal<Record<MaterialRateId, number>>({
+    cement: 0,
+    steel: 0,
+    sand: 0,
+    stone: 0,
+    bricks: 0
+  });
+  rateFields: { id: MaterialRateId; name: string; unit: string }[] = [
+    { id: 'cement', name: 'Cement', unit: 'per 50 kg bag' },
+    { id: 'steel', name: 'TMT steel', unit: 'per tonne' },
+    { id: 'sand', name: 'Sand', unit: 'per unit (100 cu. ft.)' },
+    { id: 'stone', name: 'Stone aggregate', unit: 'per unit (100 cu. ft.)' },
+    { id: 'bricks', name: 'Bricks / blocks', unit: 'per piece' }
+  ];
   checklist = signal<ChecklistPhase[]>([
     {
       id: 'planning',
@@ -196,10 +223,43 @@ export class AppComponent {
     ];
   });
 
+  materialCostLines = computed<MaterialCostLine[]>(() => {
+    const rates = this.materialRates();
+    return this.rateFields.map(field => {
+      const item = this.estimates().find(estimate => estimate.id === field.id);
+      if (!item) {
+        throw new Error(`Missing material estimate for ${field.id}`);
+      }
+      const rate = rates[field.id];
+      return {
+        id: field.id,
+        name: item.name,
+        quantity: item.primaryQty,
+        unit: item.primaryUnit,
+        rate,
+        rateUnit: field.unit,
+        cost: item.primaryQty * rate
+      };
+    });
+  });
+  materialCostTotal = computed(() =>
+    this.materialCostLines().reduce((total, line) => total + line.cost, 0)
+  );
+  allMaterialRatesEntered = computed(() =>
+    Object.values(this.materialRates()).every(rate => rate > 0)
+  );
+
+  updateMaterialRate(id: MaterialRateId, value: number): void {
+    const rate = Number.isFinite(value) && value >= 0 ? value : 0;
+    this.materialRates.update(rates => ({ ...rates, [id]: rate }));
+  }
+
   resetForm(): void {
     this.plotAreaSft.set(1200);
     this.floors.set(2);
     this.brickType.set('clay');
+    this.city.set('');
+    this.materialRates.set({ cement: 0, steel: 0, sand: 0, stone: 0, bricks: 0 });
   }
 
   toggleChecklistItem(phaseId: string, itemId: string): void {
