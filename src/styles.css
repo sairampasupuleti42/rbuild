@@ -730,10 +730,6 @@ select {
 }
 
 @media (max-width: 440px) {
-  .brand-label {
-    display: none;
-  }
-
   .hero-label {
     font-size: 0.55rem;
     letter-spacing: 0.1em;
