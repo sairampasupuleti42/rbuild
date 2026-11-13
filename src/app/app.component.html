@@ -1,145 +1,178 @@
-<main class="mx-auto min-h-screen max-w-6xl px-4 py-8 sm:px-6 lg:px-8">
-  <header class="mb-8">
-    <p class="text-sm font-semibold uppercase tracking-[0.2em] text-sky-400">rBuild</p>
-    <h1 class="mt-2 text-3xl font-bold tracking-tight text-white sm:text-4xl">Building material estimator</h1>
-    <p class="mt-3 max-w-2xl text-slate-300">
-      Get a quick, approximate material estimate for your home construction project.
-    </p>
+<main class="app-shell mx-auto min-h-screen max-w-7xl px-4 py-6 sm:px-6 sm:py-10 lg:px-8">
+  <header class="page-hero mb-8 sm:mb-10">
+    <div class="hero-content">
+      <div>
+        <div class="brand-lockup">
+          <span class="brand-mark" aria-hidden="true">r</span>
+          <span class="brand-name">rBuild</span>
+          <span class="brand-divider" aria-hidden="true"></span>
+          <span class="hero-label">BUILT FOR INDIAN HOMES</span>
+        </div>
+        <h1 class="hero-title">A clearer plan<br class="hidden sm:block"> for your build.</h1>
+        <p class="hero-copy">
+          Turn your home plans into a practical material estimate and a local budget you can take to your supplier.
+        </p>
+        <a class="hero-action no-print" href="#cost-planner">
+          Plan your budget <span aria-hidden="true">↘</span>
+        </a>
+      </div>
+
+      <div class="hero-stat" aria-live="polite">
+        <span class="hero-stat-label">PROJECT SNAPSHOT</span>
+        <span class="hero-stat-value">{{ totalBuiltUpArea() | number }}</span>
+        <span class="hero-stat-unit">sq. ft. built-up area</span>
+        <span class="hero-stat-location">{{ city() || 'Your local market' }}</span>
+      </div>
+    </div>
+    <div class="hero-orbit hero-orbit-one" aria-hidden="true"></div>
+    <div class="hero-orbit hero-orbit-two" aria-hidden="true"></div>
   </header>
 
-  <section class="grid gap-6 lg:grid-cols-[minmax(0,0.8fr)_minmax(0,1.2fr)]">
-    <form class="h-fit rounded-2xl border border-slate-700 bg-slate-800 p-6 shadow-xl" (submit)="$event.preventDefault()">
-      <h2 class="text-xl font-semibold text-white">Project details</h2>
-      <p class="mt-1 text-sm text-slate-400">Enter your plot area and building configuration.</p>
+  <section class="grid gap-6 xl:grid-cols-[minmax(17rem,0.78fr)_minmax(0,1.55fr)]">
+    <form id="project-form" class="surface-panel project-panel h-fit" (submit)="$event.preventDefault()">
+      <div class="panel-heading">
+        <span class="section-kicker">01 / YOUR PROJECT</span>
+        <h2 class="section-title">Start with the basics</h2>
+        <p class="section-copy">A few details shape your material quantities.</p>
+      </div>
 
-      <label for="city" class="mt-6 block text-sm font-medium text-slate-200">City / local market</label>
-      <input
-        id="city"
-        class="mt-2 w-full rounded-lg border border-slate-600 bg-slate-900 px-4 py-3 text-white outline-none focus:border-sky-400 focus:ring-2 focus:ring-sky-400/30"
-        type="text"
-        placeholder="e.g. Pune, Maharashtra"
-        [ngModel]="city()"
-        (ngModelChange)="city.set($event)"
-        name="city">
+      <div class="mt-6">
+        <label for="city" class="field-label">City / local market</label>
+        <input
+          id="city"
+          class="field-control mt-2"
+          type="text"
+          placeholder="e.g. Pune, Maharashtra"
+          [ngModel]="city()"
+          (ngModelChange)="city.set($event)"
+          name="city">
+      </div>
 
-      <label for="plot-area" class="mt-6 block text-sm font-medium text-slate-200">Plot area (sq. ft.)</label>
-      <input
-        id="plot-area"
-        class="mt-2 w-full rounded-lg border border-slate-600 bg-slate-900 px-4 py-3 text-white outline-none focus:border-sky-400 focus:ring-2 focus:ring-sky-400/30"
-        type="number"
-        min="1"
-        step="1"
-        [ngModel]="plotAreaSft()"
-        (ngModelChange)="plotAreaSft.set($event || 0)"
-        name="plotAreaSft">
+      <div class="mt-4 grid gap-4 sm:grid-cols-2">
+        <div>
+          <label for="plot-area" class="field-label">Plot area <span class="field-hint">sq. ft.</span></label>
+          <input
+            id="plot-area"
+            class="field-control mt-2"
+            type="number"
+            min="1"
+            step="1"
+            [ngModel]="plotAreaSft()"
+            (ngModelChange)="plotAreaSft.set($event || 0)"
+            name="plotAreaSft">
+        </div>
+        <div>
+          <label for="floors" class="field-label">Number of floors</label>
+          <input
+            id="floors"
+            class="field-control mt-2"
+            type="number"
+            min="1"
+            step="1"
+            [ngModel]="floors()"
+            (ngModelChange)="floors.set($event || 0)"
+            name="floors">
+        </div>
+      </div>
 
-      <label for="floors" class="mt-5 block text-sm font-medium text-slate-200">Number of floors</label>
-      <input
-        id="floors"
-        class="mt-2 w-full rounded-lg border border-slate-600 bg-slate-900 px-4 py-3 text-white outline-none focus:border-sky-400 focus:ring-2 focus:ring-sky-400/30"
-        type="number"
-        min="1"
-        step="1"
-        [ngModel]="floors()"
-        (ngModelChange)="floors.set($event || 0)"
-        name="floors">
+      <div class="mt-4">
+        <label for="brick-type" class="field-label">Wall material</label>
+        <select
+          id="brick-type"
+          class="field-control mt-2"
+          [ngModel]="brickType()"
+          (ngModelChange)="brickType.set($event)"
+          name="brickType">
+          <option value="clay">Red clay bricks</option>
+          <option value="cement">Cement concrete blocks</option>
+        </select>
+      </div>
 
-      <label for="brick-type" class="mt-5 block text-sm font-medium text-slate-200">Wall material</label>
-      <select
-        id="brick-type"
-        class="mt-2 w-full rounded-lg border border-slate-600 bg-slate-900 px-4 py-3 text-white outline-none focus:border-sky-400 focus:ring-2 focus:ring-sky-400/30"
-        [ngModel]="brickType()"
-        (ngModelChange)="brickType.set($event)"
-        name="brickType">
-        <option value="clay">Red clay bricks</option>
-        <option value="cement">Cement concrete blocks</option>
-      </select>
-
-      <div class="mt-6 rounded-xl bg-slate-900 p-4">
-        <p class="text-sm text-slate-400">Estimated built-up area</p>
-        <p class="mt-1 text-2xl font-bold text-sky-300">{{ totalBuiltUpArea() | number }} <span class="text-base font-medium">sq. ft.</span></p>
+      <div class="built-area-card mt-6">
+        <span class="built-area-icon" aria-hidden="true">▦</span>
+        <div>
+          <p class="built-area-label">Estimated built-up area</p>
+          <p class="built-area-value">{{ totalBuiltUpArea() | number }} <span>sq. ft.</span></p>
+        </div>
       </div>
     </form>
 
     <section aria-labelledby="estimate-heading">
-      <div class="mb-4 flex flex-wrap items-end justify-between gap-3">
-        <div>
-          <h2 id="estimate-heading" class="text-xl font-semibold text-white">Material estimate</h2>
-          <p class="mt-1 text-sm text-slate-400">Approximate quantities based on common construction thumb rules.</p>
+      <div class="section-toolbar mb-4">
+        <div class="panel-heading">
+          <span class="section-kicker">02 / MATERIALS</span>
+          <h2 id="estimate-heading" class="section-title">Your material estimate</h2>
+          <p class="section-copy">Quick quantities based on common construction thumb rules.</p>
         </div>
         <div class="no-print flex gap-2">
-          <button
-            class="rounded-lg border border-slate-500 px-4 py-2 text-sm font-semibold text-slate-200 transition hover:bg-slate-700 focus:outline-none focus:ring-2 focus:ring-slate-300"
-            type="button"
-            (click)="resetForm()">
-            Reset
-          </button>
-          <button
-            class="rounded-lg bg-sky-500 px-4 py-2 text-sm font-semibold text-slate-950 transition hover:bg-sky-400 focus:outline-none focus:ring-2 focus:ring-sky-300"
-            type="button"
-            (click)="print()">
-            Print estimate
-          </button>
+          <button class="secondary-button" type="button" (click)="resetForm()">Reset</button>
+          <button class="primary-button" type="button" (click)="print()">Print estimate</button>
         </div>
       </div>
 
-      <div class="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
+      <div class="grid gap-3 sm:grid-cols-2 2xl:grid-cols-3">
         @for (item of estimates(); track item.id) {
-          <article class="rounded-xl border border-slate-700 bg-slate-800 p-4 shadow-lg">
-            <div class="flex items-start justify-between gap-2">
+          <article class="estimate-card">
+            <div class="estimate-card-heading">
               <div>
-                <p class="text-xs font-semibold uppercase tracking-wide text-sky-400">{{ item.category }}</p>
-                <h3 class="mt-1 text-sm font-semibold text-white">{{ item.name }}</h3>
+                <p class="estimate-category">{{ item.category }}</p>
+                <h3 class="estimate-name">{{ item.name }}</h3>
               </div>
-              <span class="text-xl" aria-hidden="true">{{ item.icon }}</span>
+              <span class="estimate-icon" aria-hidden="true">{{ item.icon }}</span>
             </div>
-            <p class="mt-3 text-xl font-bold text-white">{{ item.primaryQty | number }} <span class="text-sm font-medium text-slate-300">{{ item.primaryUnit }}</span></p>
-            <p class="mt-1 text-xs text-slate-400">{{ item.secondaryQty | number }} {{ item.secondaryUnit }}</p>
-            <p class="mt-2 inline-flex rounded-full bg-slate-700 px-2.5 py-1 text-xs font-medium text-slate-200">{{ item.badge }}</p>
-            <p class="mt-2 text-xs text-slate-300">{{ item.laymanVehicle }}</p>
-            <p class="mt-2 border-t border-slate-700 pt-2 text-xs leading-relaxed text-slate-400">{{ item.tip }}</p>
+            <p class="estimate-quantity">{{ item.primaryQty | number }} <span>{{ item.primaryUnit }}</span></p>
+            <p class="estimate-secondary">{{ item.secondaryQty | number }} {{ item.secondaryUnit }}</p>
+            <p class="estimate-badge">{{ item.badge }}</p>
+            <p class="estimate-vehicle">{{ item.laymanVehicle }}</p>
+            <p class="estimate-tip">{{ item.tip }}</p>
           </article>
         }
       </div>
 
-      <p class="mt-4 text-xs leading-relaxed text-slate-500">
-        These figures are indicative estimates, not a construction specification. Actual requirements vary by design,
-        soil, structural engineering, and site conditions. Consult a qualified engineer before purchasing materials.
+      <p class="disclaimer mt-4">
+        Indicative estimates only—not a construction specification. Actual requirements vary by design, soil, structural
+        engineering, and site conditions. Consult a qualified engineer before purchasing materials.
       </p>
     </section>
   </section>
 
-  <section class="mt-8 rounded-2xl border border-slate-700 bg-slate-800 p-6 shadow-xl" aria-labelledby="cost-heading">
-    <div class="mb-5">
-      <p class="text-sm font-semibold uppercase tracking-[0.15em] text-sky-400">Local budget planner</p>
-      <h2 id="cost-heading" class="mt-1 text-2xl font-bold text-white">Material cost estimate</h2>
-      <p class="mt-2 max-w-3xl text-sm text-slate-400">
-        Enter current supplier quotes for {{ city() || 'your local market' }}. Rates are user-provided; this tool does not
-        fetch live city prices.
-      </p>
+  <section id="cost-planner" class="surface-panel cost-panel mt-8 sm:mt-10" aria-labelledby="cost-heading">
+    <div class="cost-heading">
+      <div class="panel-heading">
+        <span class="section-kicker">03 / LOCAL BUDGET</span>
+        <h2 id="cost-heading" class="section-title">Make the estimate yours</h2>
+        <p class="section-copy">
+          Add supplier quotes for {{ city() || 'your local market' }} to estimate material costs.
+          Rates are user-provided; prices are not fetched live.
+        </p>
+      </div>
+      <div class="cost-total" aria-live="polite">
+        <span>{{ allMaterialRatesEntered() ? 'ESTIMATED MATERIAL TOTAL' : 'CURRENT SUBTOTAL' }}</span>
+        <strong>{{ materialCostTotal() | currency:'INR':'symbol':'1.0-0':'en-IN' }}</strong>
+      </div>
     </div>
 
     <div class="overflow-x-auto">
-      <table class="w-full min-w-[42rem] text-left text-sm">
-        <thead class="text-xs uppercase tracking-wide text-slate-400">
-          <tr class="border-b border-slate-700">
-            <th class="pb-3 pr-4 font-medium">Material</th>
-            <th class="pb-3 pr-4 font-medium">Estimated quantity</th>
-            <th class="pb-3 pr-4 font-medium">Local rate (₹)</th>
-            <th class="pb-3 text-right font-medium">Estimated cost</th>
+      <table class="cost-table w-full min-w-[42rem] text-left text-sm">
+        <thead>
+          <tr>
+            <th>Material</th>
+            <th>Estimated quantity</th>
+            <th>Local rate (₹)</th>
+            <th class="text-right">Estimated cost</th>
           </tr>
         </thead>
-        <tbody class="divide-y divide-slate-700">
+        <tbody>
           @for (line of materialCostLines(); track line.id) {
             <tr>
-              <th scope="row" class="py-3 pr-4 font-medium text-slate-200">{{ line.name }}</th>
-              <td class="py-3 pr-4 text-slate-300">{{ line.quantity | number }} {{ line.unit }}</td>
-              <td class="py-3 pr-4">
+              <th scope="row" class="font-medium">{{ line.name }}</th>
+              <td>{{ line.quantity | number }} {{ line.unit }}</td>
+              <td>
                 <label class="sr-only" [for]="'rate-' + line.id">{{ line.name }} rate {{ line.rateUnit }}</label>
                 <div class="flex items-center gap-2">
                   <span class="text-slate-400">₹</span>
                   <input
-                    class="w-36 rounded-lg border border-slate-600 bg-slate-900 px-3 py-2 text-white outline-none focus:border-sky-400 focus:ring-2 focus:ring-sky-400/30"
+                    class="rate-input"
                     [id]="'rate-' + line.id"
                     type="number"
                     min="0"
@@ -151,7 +184,7 @@
                   <span class="whitespace-nowrap text-xs text-slate-400" [id]="'rate-unit-' + line.id">{{ line.rateUnit }}</span>
                 </div>
               </td>
-              <td class="py-3 text-right font-medium text-slate-200">
+              <td class="text-right font-medium">
                 @if (line.rate > 0) {
                   {{ line.cost | currency:'INR':'symbol':'1.0-0':'en-IN' }}
                 } @else {
@@ -164,58 +197,58 @@
       </table>
     </div>
 
-    <div class="mt-5 flex flex-wrap items-end justify-between gap-3 border-t border-slate-700 pt-4">
-      <div>
-        <p class="text-sm text-slate-400">
-          {{ allMaterialRatesEntered() ? 'Estimated material total' : 'Subtotal for materials with rates entered' }}
-        </p>
-        <p class="mt-1 text-2xl font-bold text-sky-300">
-          {{ materialCostTotal() | currency:'INR':'symbol':'1.0-0':'en-IN' }}
-        </p>
-      </div>
+    <div class="cost-footnote">
       @if (!allMaterialRatesEntered()) {
-        <p class="max-w-xl text-xs leading-relaxed text-amber-300">
-          Enter a rate for every material to complete the estimate. Total excludes labour, transport, taxes, and other
-          construction costs; confirm quantities and prices with local suppliers and your engineer.
+        <p class="cost-note cost-note-pending">
+          Add a rate for every material to complete the estimate. Total excludes labour, transport, taxes, and other
+          construction costs.
         </p>
       } @else {
-        <p class="max-w-xl text-xs leading-relaxed text-slate-400">
-          Indicative material-only budget using the rates you entered. Confirm quantities, wastage, delivery charges,
-          taxes, and current supplier prices before budgeting.
+        <p class="cost-note">
+          Material-only budget based on your rates. Confirm quantities, wastage, delivery charges, taxes, and current
+          supplier prices before budgeting.
         </p>
       }
     </div>
   </section>
 
-  <section class="mt-10" aria-labelledby="checklist-heading">
-    <div class="mb-5 flex flex-wrap items-end justify-between gap-3">
-      <div>
-        <p class="text-sm font-semibold uppercase tracking-[0.15em] text-sky-400">Site guide</p>
-        <h2 id="checklist-heading" class="mt-1 text-2xl font-bold text-white">House construction checklist</h2>
-        <p class="mt-2 max-w-3xl text-sm text-slate-400">
-          Work through these checks with your contractor and structural engineer. Progress:
-          {{ completedChecklistItems() }} of {{ totalChecklistItems() }} complete.
+  <section class="mt-10 sm:mt-14" aria-labelledby="checklist-heading">
+    <div class="section-toolbar mb-5">
+      <div class="panel-heading">
+        <span class="section-kicker">04 / ON-SITE GUIDE</span>
+        <h2 id="checklist-heading" class="section-title">Build with confidence</h2>
+        <p class="section-copy">
+          A practical checklist to review with your contractor and structural engineer.
         </p>
+      </div>
+      <div class="checklist-progress" aria-live="polite">
+        <span class="progress-count">{{ completedChecklistItems() }}<span> / {{ totalChecklistItems() }}</span></span>
+        <span class="progress-label">checks complete</span>
       </div>
     </div>
 
-    <div class="grid gap-3 md:grid-cols-2 xl:grid-cols-3">
+    <div class="grid gap-3 md:grid-cols-2 2xl:grid-cols-3">
       @for (phase of checklist(); track phase.id) {
-        <article class="rounded-xl border border-slate-700 bg-slate-800 p-4 shadow-lg">
-          <h3 class="text-sm font-semibold text-white">{{ phase.title }}</h3>
-          @if (phase.standard) {
-            <p class="mt-1 text-xs text-sky-300">Relevant BIS references: {{ phase.standard }}</p>
-          }
-          <ul class="mt-3 space-y-2">
+        <article class="checklist-card">
+          <div class="checklist-card-heading">
+            <span class="phase-mark" aria-hidden="true">{{ $index + 1 | number:'2.0' }}</span>
+            <div>
+              <h3 class="checklist-title">{{ phase.title }}</h3>
+              @if (phase.standard) {
+                <p class="checklist-standard">BIS references: {{ phase.standard }}</p>
+              }
+            </div>
+          </div>
+          <ul class="mt-4 space-y-3">
             @for (item of phase.items; track item.id) {
               <li>
-                <label class="flex cursor-pointer items-start gap-2 text-xs leading-relaxed text-slate-300">
+                <label class="checklist-item">
                   <input
-                    class="mt-0.5 h-4 w-4 shrink-0 accent-sky-400"
+                    class="checklist-checkbox"
                     type="checkbox"
                     [checked]="item.checked"
                     (change)="toggleChecklistItem(phase.id, item.id)">
-                  <span [class.line-through]="item.checked" [class.text-slate-500]="item.checked">{{ item.text }}</span>
+                  <span [class.checklist-item-done]="item.checked">{{ item.text }}</span>
                 </label>
               </li>
             }
@@ -224,10 +257,10 @@
       }
     </div>
 
-    <p class="mt-4 text-xs leading-relaxed text-slate-500">
-      This practical checklist is not a compliance certificate or construction specification. Follow the approved
-      project drawings, applicable local requirements, and current BIS editions and amendments; confirm site decisions
-      and inspection/testing requirements with the responsible qualified engineer.
+    <p class="disclaimer mt-4">
+      This checklist is not a compliance certificate or construction specification. Follow approved drawings, local
+      requirements, and current BIS editions; confirm site decisions and inspection/testing requirements with your
+      qualified engineer.
     </p>
   </section>
 </main>
