@@ -1,13 +1,22 @@
-import { Component, signal, computed } from '@angular/core';
+import { Component, HostListener, signal, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 
 type MaterialRateId = 'cement' | 'steel' | 'sand' | 'stone' | 'bricks';
 type Language = 'en' | 'te';
 
+interface PwaInstallPromptEvent extends Event {
+  prompt: () => Promise<void>;
+  userChoice: Promise<{ outcome: 'accepted' | 'dismissed'; platform: string }>;
+}
+
 const translations: Record<Language, Record<string, string>> = {
   en: {
     language: 'Language',
+    installAppTitle: 'Take rBuild with you',
+    installAppCopy: 'Install rBuild on your device for quick access as an app.',
+    installApp: 'Install app',
+    dismissInstallPrompt: 'Not now',
     brandTagline: 'BUILT FOR INDIAN HOMES',
     heroTitle: 'A clearer plan for your build.',
     heroCopy: 'Turn your home plans into a practical material estimate and a local budget you can take to your supplier.',
@@ -116,6 +125,10 @@ const translations: Record<Language, Record<string, string>> = {
   },
   te: {
     language: 'భాష',
+    installAppTitle: 'rBuildను మీతో ఉంచుకోండి',
+    installAppCopy: 'యాప్‌గా త్వరగా ఉపయోగించడానికి rBuildను మీ పరికరంలో ఇన్‌స్టాల్ చేయండి.',
+    installApp: 'యాప్‌ను ఇన్‌స్టాల్ చేయండి',
+    dismissInstallPrompt: 'ఇప్పుడొద్దు',
     brandTagline: 'భారతీయ గృహాల కోసం',
     heroTitle: 'మీ నిర్మాణానికి స్పష్టమైన ప్రణాళిక.',
     heroCopy: 'మీ ఇంటి ప్రణాళికలను ఆచరణాత్మక మెటీరియల్ అంచనా మరియు స్థానిక బడ్జెట్‌గా మార్చుకోండి.',
@@ -294,6 +307,7 @@ interface MaterialCostLine {
 })
 export class AppComponent {
   language = signal<Language>('en');
+  installPrompt = signal<PwaInstallPromptEvent | null>(null);
 
   // Layman Inputs
   plotAreaSft = signal<number>(1200);
@@ -565,6 +579,33 @@ export class AppComponent {
   allMaterialRatesEntered = computed(() =>
     Object.values(this.materialRates()).every(rate => rate > 0)
   );
+
+  @HostListener('window:beforeinstallprompt', ['$event'])
+  onBeforeInstallPrompt(event: Event): void {
+    const installEvent = event as PwaInstallPromptEvent;
+    installEvent.preventDefault();
+    this.installPrompt.set(installEvent);
+  }
+
+  @HostListener('window:appinstalled')
+  onAppInstalled(): void {
+    this.installPrompt.set(null);
+  }
+
+  async installApp(): Promise<void> {
+    const installEvent = this.installPrompt();
+    if (!installEvent) {
+      return;
+    }
+
+    await installEvent.prompt();
+    await installEvent.userChoice;
+    this.installPrompt.set(null);
+  }
+
+  dismissInstallPrompt(): void {
+    this.installPrompt.set(null);
+  }
 
   private readonly rateUnitKeys: Record<MaterialRateId, string> = {
     cement: 'perBag',

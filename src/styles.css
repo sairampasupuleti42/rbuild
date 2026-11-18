@@ -44,6 +44,36 @@ select {
   isolation: isolate;
 }
 
+.install-banner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 1.25rem;
+  padding: 1rem 1.25rem;
+  border: 1px solid rgb(164 223 218 / 20%);
+  border-radius: 1rem;
+  background: rgb(16 42 58 / 88%);
+}
+
+.install-banner-title {
+  color: #e8f0f3;
+  font-size: 0.9rem;
+  font-weight: 700;
+}
+
+.install-banner-copy {
+  margin-top: 0.25rem;
+  color: #9fb9bb;
+  font-size: 0.75rem;
+}
+
+.install-banner-actions {
+  display: flex;
+  flex: 0 0 auto;
+  gap: 0.5rem;
+}
+
 .page-hero {
   position: relative;
   overflow: hidden;
@@ -710,6 +740,11 @@ select {
 
   .section-toolbar,
   .cost-heading {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .install-banner {
     align-items: flex-start;
     flex-direction: column;
   }

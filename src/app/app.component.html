@@ -1,4 +1,17 @@
 <main class="app-shell mx-auto min-h-screen max-w-7xl px-4 py-6 sm:px-6 sm:py-10 lg:px-8" [attr.lang]="language()">
+  @if (installPrompt()) {
+    <aside class="install-banner no-print" [attr.aria-label]="t('installAppTitle')">
+      <div>
+        <p class="install-banner-title">{{ t('installAppTitle') }}</p>
+        <p class="install-banner-copy">{{ t('installAppCopy') }}</p>
+      </div>
+      <div class="install-banner-actions">
+        <button class="primary-button" type="button" (click)="installApp()">{{ t('installApp') }}</button>
+        <button class="secondary-button" type="button" (click)="dismissInstallPrompt()">{{ t('dismissInstallPrompt') }}</button>
+      </div>
+    </aside>
+  }
+
   <header class="page-hero mb-8 sm:mb-10">
     <div class="hero-content">
       <div>

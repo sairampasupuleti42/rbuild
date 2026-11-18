@@ -21,6 +21,8 @@
             "assets": [
               { "glob": "**/*", "input": "public" },
               "src/manifest.webmanifest",
+              "src/icon-192.png",
+              "src/icon-512.png",
               "src/sw.js"
             ],
             "styles": ["src/styles.css"],
