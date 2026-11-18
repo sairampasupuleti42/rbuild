@@ -5,6 +5,12 @@ import { FormsModule } from '@angular/forms';
 type MaterialRateId = 'cement' | 'steel' | 'sand' | 'stone' | 'bricks';
 type Language = 'en' | 'te';
 
+const LANGUAGE_STORAGE_KEY = 'rbuild-language';
+
+function getStoredLanguage(): Language {
+  return localStorage.getItem(LANGUAGE_STORAGE_KEY) === 'te' ? 'te' : 'en';
+}
+
 interface PwaInstallPromptEvent extends Event {
   prompt: () => Promise<void>;
   userChoice: Promise<{ outcome: 'accepted' | 'dismissed'; platform: string }>;
@@ -306,7 +312,7 @@ interface MaterialCostLine {
   templateUrl: './app.component.html'
 })
 export class AppComponent {
-  language = signal<Language>('en');
+  language = signal<Language>(getStoredLanguage());
   installPrompt = signal<PwaInstallPromptEvent | null>(null);
 
   // Layman Inputs
@@ -617,6 +623,11 @@ export class AppComponent {
 
   t(key: string): string {
     return translations[this.language()][key] ?? key;
+  }
+
+  setLanguage(language: Language): void {
+    this.language.set(language);
+    localStorage.setItem(LANGUAGE_STORAGE_KEY, language);
   }
 
   updateMaterialRate(id: MaterialRateId, value: number): void {

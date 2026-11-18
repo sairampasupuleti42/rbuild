@@ -21,7 +21,7 @@
             id="language-select"
             class="field-control w-auto"
             [ngModel]="language()"
-            (ngModelChange)="language.set($event)"
+            (ngModelChange)="setLanguage($event)"
             name="language">
             <option value="en">English</option>
             <option value="te">తెలుగు</option>
