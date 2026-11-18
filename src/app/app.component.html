@@ -1,27 +1,39 @@
-<main class="app-shell mx-auto min-h-screen max-w-7xl px-4 py-6 sm:px-6 sm:py-10 lg:px-8">
+<main class="app-shell mx-auto min-h-screen max-w-7xl px-4 py-6 sm:px-6 sm:py-10 lg:px-8" [attr.lang]="language()">
   <header class="page-hero mb-8 sm:mb-10">
     <div class="hero-content">
       <div>
+        <div class="mb-4 flex items-center justify-end gap-2">
+          <label for="language-select" class="field-label">{{ t('language') }}</label>
+          <select
+            id="language-select"
+            class="field-control w-auto"
+            [ngModel]="language()"
+            (ngModelChange)="language.set($event)"
+            name="language">
+            <option value="en">English</option>
+            <option value="te">తెలుగు</option>
+          </select>
+        </div>
         <div class="brand-lockup">
           <span class="brand-mark" aria-hidden="true">r</span>
           <span class="brand-name">rBuild</span>
           <span class="brand-divider" aria-hidden="true"></span>
-          <span class="hero-label">BUILT FOR INDIAN HOMES</span>
+          <span class="hero-label">{{ t('brandTagline') }}</span>
         </div>
-        <h1 class="hero-title">A clearer plan<br class="hidden sm:block"> for your build.</h1>
+        <h1 class="hero-title">{{ t('heroTitle') }}</h1>
         <p class="hero-copy">
-          Turn your home plans into a practical material estimate and a local budget you can take to your supplier.
+          {{ t('heroCopy') }}
         </p>
         <a class="hero-action no-print" href="#cost-planner">
-          Plan your budget <span aria-hidden="true">↘</span>
+          {{ t('planBudget') }} <span aria-hidden="true">↘</span>
         </a>
       </div>
 
       <div class="hero-stat" aria-live="polite">
-        <span class="hero-stat-label">PROJECT SNAPSHOT</span>
+        <span class="hero-stat-label">{{ t('projectSnapshot') }}</span>
         <span class="hero-stat-value">{{ totalBuiltUpArea() | number }}</span>
-        <span class="hero-stat-unit">sq. ft. built-up area</span>
-        <span class="hero-stat-location">{{ city() || 'Your local market' }}</span>
+        <span class="hero-stat-unit">{{ t('builtUpArea') }}</span>
+        <span class="hero-stat-location">{{ city() || t('localMarket') }}</span>
       </div>
     </div>
     <div class="hero-orbit hero-orbit-one" aria-hidden="true"></div>
@@ -31,18 +43,18 @@
   <section class="grid gap-6 xl:grid-cols-[minmax(17rem,0.78fr)_minmax(0,1.55fr)]">
     <form id="project-form" class="surface-panel project-panel h-fit" (submit)="$event.preventDefault()">
       <div class="panel-heading">
-        <span class="section-kicker">01 / YOUR PROJECT</span>
-        <h2 class="section-title">Start with the basics</h2>
-        <p class="section-copy">A few details shape your material quantities.</p>
+        <span class="section-kicker">{{ t('project') }}</span>
+        <h2 class="section-title">{{ t('startBasics') }}</h2>
+        <p class="section-copy">{{ t('projectCopy') }}</p>
       </div>
 
       <div class="mt-6">
-        <label for="city" class="field-label">City / local market</label>
+        <label for="city" class="field-label">{{ t('city') }}</label>
         <input
           id="city"
           class="field-control mt-2"
           type="text"
-          placeholder="e.g. Pune, Maharashtra"
+          [placeholder]="t('cityPlaceholder')"
           [ngModel]="city()"
           (ngModelChange)="city.set($event)"
           name="city">
@@ -50,7 +62,7 @@
 
       <div class="mt-4 grid gap-4 sm:grid-cols-2">
         <div>
-          <label for="plot-area" class="field-label">Plot area <span class="field-hint">sq. ft.</span></label>
+          <label for="plot-area" class="field-label">{{ t('plotArea') }} <span class="field-hint">{{ t('sqFt') }}</span></label>
           <input
             id="plot-area"
             class="field-control mt-2"
@@ -62,7 +74,7 @@
             name="plotAreaSft">
         </div>
         <div>
-          <label for="floors" class="field-label">Number of floors</label>
+          <label for="floors" class="field-label">{{ t('floors') }}</label>
           <input
             id="floors"
             class="field-control mt-2"
@@ -76,23 +88,23 @@
       </div>
 
       <div class="mt-4">
-        <label for="brick-type" class="field-label">Wall material</label>
+        <label for="brick-type" class="field-label">{{ t('wallMaterial') }}</label>
         <select
           id="brick-type"
           class="field-control mt-2"
           [ngModel]="brickType()"
           (ngModelChange)="brickType.set($event)"
           name="brickType">
-          <option value="clay">Red clay bricks</option>
-          <option value="cement">Cement concrete blocks</option>
+          <option value="clay">{{ t('clayOption') }}</option>
+          <option value="cement">{{ t('blockOption') }}</option>
         </select>
       </div>
 
       <div class="built-area-card mt-6">
         <span class="built-area-icon" aria-hidden="true">▦</span>
         <div>
-          <p class="built-area-label">Estimated built-up area</p>
-          <p class="built-area-value">{{ totalBuiltUpArea() | number }} <span>sq. ft.</span></p>
+          <p class="built-area-label">{{ t('estimatedBuiltUpArea') }}</p>
+          <p class="built-area-value">{{ totalBuiltUpArea() | number }} <span>{{ t('sqFt') }}</span></p>
         </div>
       </div>
     </form>
@@ -100,18 +112,18 @@
     <section aria-labelledby="estimate-heading">
       <div class="section-toolbar mb-4">
         <div class="panel-heading">
-          <span class="section-kicker">02 / MATERIALS</span>
-          <h2 id="estimate-heading" class="section-title">Your material estimate</h2>
-          <p class="section-copy">Quick quantities based on common construction thumb rules.</p>
+          <span class="section-kicker">{{ t('materials') }}</span>
+          <h2 id="estimate-heading" class="section-title">{{ t('materialEstimate') }}</h2>
+          <p class="section-copy">{{ t('thumbRules') }}</p>
         </div>
         <div class="no-print flex gap-2">
-          <button class="secondary-button" type="button" (click)="resetForm()">Reset</button>
-          <button class="primary-button" type="button" (click)="print()">Print estimate</button>
+          <button class="secondary-button" type="button" (click)="resetForm()">{{ t('reset') }}</button>
+          <button class="primary-button" type="button" (click)="print()">{{ t('printEstimate') }}</button>
         </div>
       </div>
 
       <div class="grid gap-3 sm:grid-cols-2 2xl:grid-cols-3">
-        @for (item of estimates(); track item.id) {
+        @for (item of translatedEstimates(); track item.id) {
           <article class="estimate-card">
             <div class="estimate-card-heading">
               <div>
@@ -130,8 +142,7 @@
       </div>
 
       <p class="disclaimer mt-4">
-        Indicative estimates only—not a construction specification. Actual requirements vary by design, soil, structural
-        engineering, and site conditions. Consult a qualified engineer before purchasing materials.
+        {{ t('estimateDisclaimer') }}
       </p>
     </section>
   </section>
@@ -139,15 +150,14 @@
   <section id="cost-planner" class="surface-panel cost-panel mt-8 sm:mt-10" aria-labelledby="cost-heading">
     <div class="cost-heading">
       <div class="panel-heading">
-        <span class="section-kicker">03 / LOCAL BUDGET</span>
-        <h2 id="cost-heading" class="section-title">Make the estimate yours</h2>
+        <span class="section-kicker">{{ t('localBudget') }}</span>
+        <h2 id="cost-heading" class="section-title">{{ t('makeEstimateYours') }}</h2>
         <p class="section-copy">
-          Add supplier quotes for {{ city() || 'your local market' }} to estimate material costs.
-          Rates are user-provided; prices are not fetched live.
+          {{ t('supplierQuotes') }} {{ city() || t('localMarket') }} {{ t('estimateCosts') }}
         </p>
       </div>
       <div class="cost-total" aria-live="polite">
-        <span>{{ allMaterialRatesEntered() ? 'ESTIMATED MATERIAL TOTAL' : 'CURRENT SUBTOTAL' }}</span>
+        <span>{{ allMaterialRatesEntered() ? t('estimatedTotal') : t('currentSubtotal') }}</span>
         <strong>{{ materialCostTotal() | currency:'INR':'symbol':'1.0-0':'en-IN' }}</strong>
       </div>
     </div>
@@ -156,10 +166,10 @@
       <table class="cost-table w-full min-w-[42rem] text-left text-sm">
         <thead>
           <tr>
-            <th>Material</th>
-            <th>Estimated quantity</th>
-            <th>Local rate (₹)</th>
-            <th class="text-right">Estimated cost</th>
+            <th>{{ t('material') }}</th>
+            <th>{{ t('estimatedQuantity') }}</th>
+            <th>{{ t('localRate') }}</th>
+            <th class="text-right">{{ t('estimatedCost') }}</th>
           </tr>
         </thead>
         <tbody>
@@ -188,7 +198,7 @@
                 @if (line.rate > 0) {
                   {{ line.cost | currency:'INR':'symbol':'1.0-0':'en-IN' }}
                 } @else {
-                  <span class="text-slate-500">Add rate</span>
+                  <span class="text-slate-500">{{ t('addRate') }}</span>
                 }
               </td>
             </tr>
@@ -200,13 +210,11 @@
     <div class="cost-footnote">
       @if (!allMaterialRatesEntered()) {
         <p class="cost-note cost-note-pending">
-          Add a rate for every material to complete the estimate. Total excludes labour, transport, taxes, and other
-          construction costs.
+          {{ t('pendingRates') }}
         </p>
       } @else {
         <p class="cost-note">
-          Material-only budget based on your rates. Confirm quantities, wastage, delivery charges, taxes, and current
-          supplier prices before budgeting.
+          {{ t('completedRates') }}
         </p>
       }
     </div>
@@ -215,27 +223,27 @@
   <section class="mt-10 sm:mt-14" aria-labelledby="checklist-heading">
     <div class="section-toolbar mb-5">
       <div class="panel-heading">
-        <span class="section-kicker">04 / ON-SITE GUIDE</span>
-        <h2 id="checklist-heading" class="section-title">Build with confidence</h2>
+        <span class="section-kicker">{{ t('onSiteGuide') }}</span>
+        <h2 id="checklist-heading" class="section-title">{{ t('buildConfidence') }}</h2>
         <p class="section-copy">
-          A practical checklist to review with your contractor and structural engineer.
+          {{ t('checklistIntro') }}
         </p>
       </div>
       <div class="checklist-progress" aria-live="polite">
         <span class="progress-count">{{ completedChecklistItems() }}<span> / {{ totalChecklistItems() }}</span></span>
-        <span class="progress-label">checks complete</span>
+        <span class="progress-label">{{ t('checksComplete') }}</span>
       </div>
     </div>
 
     <div class="grid gap-3 md:grid-cols-2 2xl:grid-cols-3">
-      @for (phase of checklist(); track phase.id) {
+      @for (phase of translatedChecklist(); track phase.id) {
         <article class="checklist-card">
           <div class="checklist-card-heading">
             <span class="phase-mark" aria-hidden="true">{{ $index + 1 | number:'2.0' }}</span>
             <div>
               <h3 class="checklist-title">{{ phase.title }}</h3>
               @if (phase.standard) {
-                <p class="checklist-standard">BIS references: {{ phase.standard }}</p>
+                <p class="checklist-standard">{{ t('bisReferences') }} {{ phase.standard }}</p>
               }
             </div>
           </div>
@@ -258,9 +266,7 @@
     </div>
 
     <p class="disclaimer mt-4">
-      This checklist is not a compliance certificate or construction specification. Follow approved drawings, local
-      requirements, and current BIS editions; confirm site decisions and inspection/testing requirements with your
-      qualified engineer.
+      {{ t('checklistDisclaimer') }}
     </p>
   </section>
 </main>
