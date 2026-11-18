@@ -11,7 +11,7 @@
       "prefix": "app",
       "architect": {
         "build": {
-          "builder": "@angular-devkit/build-angular:application",
+          "builder": "@angular/build:application",
           "options": {
             "outputPath": "dist/rbuild",
             "index": "src/index.html",
@@ -37,6 +37,22 @@
             }
           },
           "defaultConfiguration": "production"
+        },
+        "test": {
+          "builder": "@angular/build:unit-test",
+          "options": {
+            "buildTarget": "rbuild:build:production",
+            "tsConfig": "tsconfig.spec.json",
+            "coverage": true,
+            "coverageInclude": ["src/app/app.component.ts"],
+            "coverageThresholds": {
+              "perFile": true,
+              "statements": 95,
+              "branches": 95,
+              "functions": 95,
+              "lines": 95
+            }
+          }
         }
       }
     }
