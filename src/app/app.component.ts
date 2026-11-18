@@ -50,7 +50,7 @@ interface MaterialCostLine {
 export class AppComponent {
   // Layman Inputs
   plotAreaSft = signal<number>(1200);
-  floors = signal<number>(2);
+  floors = signal<number>(0);
   brickType = signal<'clay' | 'cement'>('clay');
   city = signal('');
   materialRates = signal<Record<MaterialRateId, number>>({
@@ -126,7 +126,7 @@ export class AppComponent {
   );
 
   // Total Slab / Built-up Area
-  totalBuiltUpArea = computed(() => (this.plotAreaSft() || 0) * (this.floors() || 1));
+  totalBuiltUpArea = computed(() => (this.plotAreaSft() || 0) * this.floors());
 
   // Calculations based on Indian Construction Standards (IS Thumb Rules)
   estimates = computed<MaterialItem[]>(() => {
@@ -256,7 +256,7 @@ export class AppComponent {
 
   resetForm(): void {
     this.plotAreaSft.set(1200);
-    this.floors.set(2);
+    this.floors.set(0);
     this.brickType.set('clay');
     this.city.set('');
     this.materialRates.set({ cement: 0, steel: 0, sand: 0, stone: 0, bricks: 0 });
