@@ -19,8 +19,8 @@ interface PwaInstallPromptEvent extends Event {
 const translations: Record<Language, Record<string, string>> = {
   en: {
     language: 'Language',
-    installAppTitle: 'Take rBuild with you',
-    installAppCopy: 'Install rBuild on your device for quick access as an app.',
+    installAppTitle: 'Take rbuild with you',
+    installAppCopy: 'Install rbuild on your device for quick access as an app.',
     installApp: 'Install app',
     dismissInstallPrompt: 'Not now',
     brandTagline: 'BUILT FOR INDIAN HOMES',
@@ -131,8 +131,8 @@ const translations: Record<Language, Record<string, string>> = {
   },
   te: {
     language: 'భాష',
-    installAppTitle: 'rBuildను మీతో ఉంచుకోండి',
-    installAppCopy: 'యాప్‌గా త్వరగా ఉపయోగించడానికి rBuildను మీ పరికరంలో ఇన్‌స్టాల్ చేయండి.',
+    installAppTitle: 'rbuildను మీతో ఉంచుకోండి',
+    installAppCopy: 'యాప్‌గా త్వరగా ఉపయోగించడానికి rbuildను మీ పరికరంలో ఇన్‌స్టాల్ చేయండి.',
     installApp: 'యాప్‌ను ఇన్‌స్టాల్ చేయండి',
     dismissInstallPrompt: 'ఇప్పుడొద్దు',
     brandTagline: 'భారతీయ గృహాల కోసం',
@@ -585,6 +585,7 @@ export class AppComponent {
   allMaterialRatesEntered = computed(() =>
     Object.values(this.materialRates()).every(rate => rate > 0)
   );
+
 
   @HostListener('window:beforeinstallprompt', ['$event'])
   onBeforeInstallPrompt(event: Event): void {

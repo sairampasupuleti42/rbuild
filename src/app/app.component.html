@@ -29,7 +29,7 @@
         </div>
         <div class="brand-lockup">
           <span class="brand-mark" aria-hidden="true">r</span>
-          <span class="brand-name">rBuild</span>
+          <span class="brand-name">rbuild</span>
           <span class="brand-divider" aria-hidden="true"></span>
           <span class="hero-label">{{ t('brandTagline') }}</span>
         </div>
@@ -95,7 +95,7 @@
             min="0"
             step="1"
             [ngModel]="floors()"
-            (ngModelChange)="floors.set($event || 0)"
+            (ngModelChange)="floors.set($event || 1)"
             name="floors">
         </div>
       </div>
