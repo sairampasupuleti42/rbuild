@@ -1,32 +1,113 @@
 # rbuild
 
-rbuild is an Angular construction estimation application for Indian residential
-projects. Upload a text-searchable house plan to estimate its built-up area and
-construction quantities from the reference estimate, then add local supplier
-rates for a project budget. The app also provides a construction checklist and
-supports English and Telugu.
+rbuild is a browser-based construction planning tool for Indian residential
+projects. It helps homeowners, contractors, and estimators turn a
+text-searchable floor plan into an initial material estimate and local project
+budget.
 
-## Features
+The application runs locally in the browser. Uploaded floor plans are not sent
+to a server.
 
-- Calculate the built-up area from plot area and floor count
-- Estimate cement, TMT steel, sand, stone aggregate, clay bricks, or concrete blocks
-- Enter local supplier rates and calculate an estimated material subtotal
-- Switch between English and Telugu
-- Generate an estimate from the area statement in a text-searchable floor-plan PDF (processed locally in the browser)
-- Print or save the estimate
-- Use the app as an installable Progressive Web App
-- View a reference estimate based on `CH_Srinivas_Rao_Detailed_Estimation.pdf`
+## Project scope
+
+rbuild covers the early planning stage of a residential build:
+
+- Review a house plan and identify its built-up area and number of floors
+- Generate indicative quantities for the main structural and finishing
+  materials
+- Compare common clay-brick and concrete-block wall options
+- Add local supplier rates and calculate a material-only budget
+- View a concept 3D house preview based on the plan area and floor count
 - Follow a phase-by-phase construction and inspection checklist
+- Use the planner in English or Telugu
+
+This is a planning aid, not an engineering, architectural, quantity-surveying,
+or construction service. The output must be reviewed by a qualified engineer
+and checked against approved drawings, soil conditions, structural design,
+local requirements, and current supplier quotations.
+
+## Functionality
+
+### Floor-plan estimation
+
+- Calculate built-up area from plot area per floor and floor count
+- Read the total area statement and floor count from a text-searchable PDF
+- Support square-foot and square-metre area statements
+- Process image-only and unreadable plans with clear validation and manual
+  fallback
+- Enforce a 25 MB PDF upload limit
+- Clear extracted plan data when project dimensions are changed manually
+
+### Material quantities
+
+- Cement in 50 kg bags and 25 kg equivalents
+- TMT reinforcement in tonnes and kilograms
+- Sand and stone aggregate in units and cubic feet
+- Clay bricks or cement concrete blocks
+- Reference values scaled from the bundled detailed estimate
+- Print or save the generated estimate
+
+### 3D house preview
+
+- Display an architectural concept for the active floor count and footprint
+- Switch between isometric, front, and side views
+- Show area, footprint, and floor-count details beside the model
+- Clearly identify the preview as a conceptual visualization rather than an
+  approved construction drawing
+
+### Local budget
+
+- Add supplier rates for cement, steel, sand, stone, and wall material
+- Calculate cost subtotals from estimated quantities
+- Show the current subtotal until all material rates are entered
+- Exclude labour, transport, taxes, wastage, and other costs unless entered
+  separately
+
+### Construction checklist
+
+- Review planning, foundation, reinforced-concrete, masonry,
+  waterproofing, services, and handover stages
+- Track completed items for the current browser session
+- Include relevant BIS reference categories
+- Support bilingual checklist labels and guidance
+
+### App and update experience
+
+- Install as a Progressive Web App
+- Work as a responsive browser application on desktop and mobile
+- Cache navigation responses for offline fallback
+- Check for deployed builds periodically
+- Notify users when a new build is ready
+- Let users reload immediately or dismiss the notification
+
+## Estimation rules
+
+The material estimates use the following indicative planning rules:
+
+- Built-up area: searchable plan area when available; otherwise plot area per
+  floor multiplied by floor count
+- Cement: approximately 0.42 bags of 50 kg per square foot
+- Steel: scaled from 3,887 kg of reinforcement for the 1,128 sq. ft.,
+  three-floor reference project
+- Sand: approximately 1.8 cubic feet per square foot
+- Stone aggregate: approximately 1.35 cubic feet per square foot
+- Clay bricks: scaled from 40.59 cubic metres of reference brick masonry,
+  using 500 bricks per cubic metre
+- Concrete blocks: approximately 1.4 pieces per square foot
+
+The bundled `CH_Srinivas_Rao_Detailed_Estimation.pdf` is used as a reference
+source for reinforcement, masonry, plaster, and construction cost scaling.
+Supplier prices are never fetched automatically.
 
 ## Technology
 
-- Angular 22 with standalone components
-- TypeScript
-- Angular signals and computed values
-- Tailwind CSS loaded in `src/index.html`
-- Vitest unit tests
-- Firebase Hosting
-- A service worker for navigation caching and PWA installation
+- Browser application
+- PDF processing in the browser
+- Responsive desktop and mobile interface
+- English and Telugu localization
+- Unit-tested calculation and PDF-extraction behavior
+- Service-worker navigation caching
+- Firebase Hosting deployment
 
 ## Getting started
 
@@ -41,57 +122,22 @@ Install dependencies:
 npm ci
 ```
 
-Run the development server:
-
-```bash
-npx ng serve
-```
-
-Open `http://localhost:4200/`.
-
-## Build and test
-
-Run the unit tests:
+Run the local test suite:
 
 ```bash
 npm test -- --watch=false
 ```
 
-Create the production build:
+Create a production build:
 
 ```bash
 npm run build
 ```
 
-The build output is written to `dist/rbuild/browser`. The build script stamps
-the generated `index.html` with the deployment time in Asia/Kolkata.
+The production output is written to `dist/rbuild/browser`. The build script
+stamps the generated page with the deployment time in Asia/Kolkata.
 
-## Estimation behavior
-
-The material estimates use the following indicative calculations:
-
-- Built-up area: read from a searchable plan PDF when available; otherwise
-  plot area in square feet multiplied by the number of floors
-- Cement: approximately 0.42 bags of 50 kg per square foot
-- Steel: scaled from 3,887 kg reinforcement for the 1,128 sq. ft.,
-  three-floor reference project
-- Sand: approximately 1.8 cubic feet per square foot
-- Stone aggregate: approximately 1.35 cubic feet per square foot
-- Clay bricks: scaled from 40.59 cubic metres of reference brick masonry,
-  using 500 bricks per cubic metre
-- Concrete blocks: approximately 1.4 pieces per square foot
-
-Reference masonry, plaster, steel, and total construction cost are scaled by
-built-up area using the bundled detailed estimate. Cement, sand, aggregate, and
-concrete-block quantities use the planning rules above. The plan PDF is read in
-the browser and is not uploaded; scanned image-only PDFs need area and floor
-details entered manually.
-
-These values are planning estimates, not construction specifications. Final
-quantities and costs require a qualified engineer, approved drawings, soil and
-structural analysis, and local supplier quotations.
-
-## Firebase deployment
+## Deployment
 
 Deploy the production build with the Firebase CLI:
 
@@ -99,13 +145,6 @@ Deploy the production build with the Firebase CLI:
 npm run deploy
 ```
 
-This runs the production build and deploys `dist/rbuild/browser` to Firebase
-Hosting using `.firebaserc`.
-
-Pushing a commit to `main` also builds and deploys the app through
-`.github/workflows/firebase-hosting.yml`. The workflow can also be started
-manually from the Actions tab.
-
-To enable automatic deployment, add a GitHub repository secret named
-`FIREBASE_SERVICE_ACCOUNT_RBUILD`. Its value must be a Firebase service account
-JSON with permission to deploy the `rbuild` Firebase project.
+The deployment uses `firebase.json` and `.firebaserc`. Pushing a commit to
+`main` can also build and deploy the app through the configured GitHub Actions
+workflow.
