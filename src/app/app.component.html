@@ -12,6 +12,19 @@
     </aside>
   }
 
+  @if (updateReady()) {
+    <aside class="install-banner no-print" [attr.aria-label]="t('updateReadyTitle')" role="status">
+      <div>
+        <p class="install-banner-title">{{ t('updateReadyTitle') }}</p>
+        <p class="install-banner-copy">{{ t('updateReadyCopy') }}</p>
+      </div>
+      <div class="install-banner-actions">
+        <button class="primary-button" type="button" (click)="reloadForUpdate()">{{ t('reloadUpdate') }}</button>
+        <button class="secondary-button" type="button" (click)="dismissUpdatePrompt()">{{ t('dismissUpdate') }}</button>
+      </div>
+    </aside>
+  }
+
   <header class="page-hero mb-8 sm:mb-10">
     <div class="hero-content">
       <div>

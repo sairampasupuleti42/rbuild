@@ -8,6 +8,7 @@ describe('AppComponent', () => {
   beforeEach(() => {
     TestBed.resetTestingModule();
     localStorage.clear();
+    sessionStorage.clear();
     vi.restoreAllMocks();
   });
 
@@ -345,6 +346,35 @@ describe('AppComponent', () => {
 
     app.toggleChecklistItem('custom-phase', 'custom-item');
     expect(app.completedChecklistItems()).toBe(2);
+  });
+
+  it('shows, dismisses, and reloads for an available PWA update', async () => {
+    const app = new AppComponent();
+
+    app.onServiceWorkerUpdateReady();
+    expect(app.updateReady()).toBe(true);
+    expect(sessionStorage.getItem('rbuild-update-ready')).toBe('true');
+
+    const postMessage = vi.fn();
+    Object.defineProperty(navigator, 'serviceWorker', {
+      configurable: true,
+      value: {
+        getRegistration: vi.fn().mockResolvedValue({ waiting: { postMessage } })
+      }
+    });
+    app.reloadForUpdate();
+    expect(sessionStorage.getItem('rbuild-update-ready')).toBeNull();
+    await Promise.resolve();
+    expect(postMessage).toHaveBeenCalledWith({ type: 'SKIP_WAITING' });
+    delete (navigator as Partial<Navigator> & { serviceWorker?: unknown }).serviceWorker;
+
+    app.dismissUpdatePrompt();
+    expect(app.updateReady()).toBe(false);
+    expect(sessionStorage.getItem('rbuild-update-ready')).toBeNull();
+
+    sessionStorage.setItem('rbuild-update-ready', 'true');
+    const reloadedApp = new AppComponent();
+    expect(reloadedApp.updateReady()).toBe(true);
   });
 
   it('handles install prompt lifecycle and printing', async () => {

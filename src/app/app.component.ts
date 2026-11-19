@@ -25,6 +25,10 @@ const translations: Record<Language, Record<string, string>> = {
     installAppCopy: 'Install rbuild on your device for quick access as an app.',
     installApp: 'Install app',
     dismissInstallPrompt: 'Not now',
+    updateReadyTitle: 'A new rbuild update is ready',
+    updateReadyCopy: 'Reload to use the latest build and features.',
+    reloadUpdate: 'Reload now',
+    dismissUpdate: 'Later',
     brandTagline: 'BUILT FOR INDIAN HOMES',
     heroTitle: 'A clearer plan for your build.',
     heroCopy: 'Upload a text-readable floor plan to estimate built-up area and construction quantities from the reference estimate, then add local supplier rates for a project budget.',
@@ -169,6 +173,10 @@ const translations: Record<Language, Record<string, string>> = {
     installAppCopy: 'యాప్‌గా త్వరగా ఉపయోగించడానికి rbuildను మీ పరికరంలో ఇన్‌స్టాల్ చేయండి.',
     installApp: 'యాప్‌ను ఇన్‌స్టాల్ చేయండి',
     dismissInstallPrompt: 'ఇప్పుడొద్దు',
+    updateReadyTitle: 'కొత్త rbuild అప్‌డేట్ సిద్ధంగా ఉంది',
+    updateReadyCopy: 'తాజా బిల్డ్ మరియు ఫీచర్లను ఉపయోగించడానికి పేజీని రీలోడ్ చేయండి.',
+    reloadUpdate: 'ఇప్పుడే రీలోడ్ చేయండి',
+    dismissUpdate: 'తరువాత',
     brandTagline: 'భారతీయ గృహాల కోసం',
     heroTitle: 'మీ నిర్మాణానికి స్పష్టమైన ప్రణాళిక.',
     heroCopy: 'టెక్స్ట్ చదవగలిగే ఫ్లోర్ ప్లాన్‌ను అప్‌లోడ్ చేసి, సూచన అంచనా ఆధారంగా నిర్మిత విస్తీర్ణం మరియు మెటీరియల్ పరిమాణాలను లెక్కించండి; స్థానిక సరఫరాదారుల ధరలతో బడ్జెట్ రూపొందించండి.',
@@ -415,6 +423,7 @@ interface MaterialCostLine {
 export class AppComponent {
   language = signal<Language>(getStoredLanguage());
   installPrompt = signal<PwaInstallPromptEvent | null>(null);
+  updateReady = signal(false);
   planPdf = signal<File | null>(null);
   planPdfError = signal('');
   estimateError = signal('');
@@ -547,7 +556,9 @@ export class AppComponent {
   constructor(
     @Inject(PLAN_SUMMARY_READER)
     private readonly readPlanSummary: (file: File) => Promise<PlanSummary> = extractPlanSummary
-  ) {}
+  ) {
+    this.updateReady.set(sessionStorage.getItem('rbuild-update-ready') === 'true');
+  }
 
   // Calculations based on Indian Construction Standards (IS Thumb Rules)
   estimates = computed<MaterialItem[]>(() => {
@@ -752,6 +763,12 @@ export class AppComponent {
     this.installPrompt.set(null);
   }
 
+  @HostListener('window:rbuild-update-ready')
+  onServiceWorkerUpdateReady(): void {
+    this.updateReady.set(true);
+    sessionStorage.setItem('rbuild-update-ready', 'true');
+  }
+
   async installApp(): Promise<void> {
     const installEvent = this.installPrompt();
     if (!installEvent) {
@@ -765,6 +782,23 @@ export class AppComponent {
 
   dismissInstallPrompt(): void {
     this.installPrompt.set(null);
+  }
+
+  dismissUpdatePrompt(): void {
+    this.updateReady.set(false);
+    sessionStorage.removeItem('rbuild-update-ready');
+  }
+
+  reloadForUpdate(): void {
+    sessionStorage.removeItem('rbuild-update-ready');
+    void navigator.serviceWorker?.getRegistration().then(registration => {
+      const waitingWorker = registration?.waiting;
+      if (waitingWorker) {
+        waitingWorker.postMessage({ type: 'SKIP_WAITING' });
+        return;
+      }
+      window.location.reload();
+    }).catch(() => window.location.reload());
   }
 
   private readonly rateUnitKeys: Record<MaterialRateId, string> = {

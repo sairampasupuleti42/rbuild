@@ -20,7 +20,33 @@
   </footer>
   <script>
     if ('serviceWorker' in navigator) {
-      navigator.serviceWorker.register('/sw.js').catch(console.error);
+      navigator.serviceWorker.register('/sw.js').then((registration) => {
+        const notifyUpdateReady = (worker) => {
+          if (worker && navigator.serviceWorker.controller) {
+            sessionStorage.setItem('rbuild-update-ready', 'true');
+            window.dispatchEvent(new CustomEvent('rbuild-update-ready'));
+          }
+        };
+
+        notifyUpdateReady(registration.waiting);
+        registration.addEventListener('updatefound', () => {
+          const worker = registration.installing;
+          worker?.addEventListener('statechange', () => {
+            if (worker.state === 'installed') {
+              notifyUpdateReady(worker);
+            }
+          });
+        });
+
+        navigator.serviceWorker.addEventListener('controllerchange', () => {
+          window.location.reload();
+        });
+
+        const updateTimer = window.setInterval(() => {
+          registration.update().catch(console.error);
+        }, 15 * 60 * 1000);
+        window.addEventListener('beforeunload', () => window.clearInterval(updateTimer));
+      }).catch(console.error);
     }
   </script>
 </body>
