@@ -33,6 +33,14 @@ const translations: Record<Language, Record<string, string>> = {
     project: '01 / YOUR PROJECT',
     startBasics: 'Start with the basics',
     projectCopy: 'A few details shape your material quantities.',
+    planDocument: 'Plan or model PDF',
+    planDocumentCopy: 'Attach an approved plan or model for reference.',
+    choosePdf: 'Choose PDF',
+    removePdf: 'Remove',
+    pdfOnlyError: 'Please choose a PDF file.',
+    pdfSizeError: 'The PDF must be 25 MB or smaller.',
+    pdfAttached: 'Attached',
+    pdfLocalNote: 'This file stays in your browser for this session.',
     city: 'City / local market',
     cityPlaceholder: 'e.g. Pune, Maharashtra',
     plotArea: 'Plot area',
@@ -47,6 +55,13 @@ const translations: Record<Language, Record<string, string>> = {
     reset: 'Reset',
     printEstimate: 'Print estimate',
     estimateDisclaimer: 'Indicative estimates only—not a construction specification. Actual requirements vary by design, soil, structural engineering, and site conditions. Consult a qualified engineer before purchasing materials.',
+    referenceEstimate: 'Reference PDF parameters',
+    referenceEstimateCopy: 'Calibrated from CH_Srinivas_Rao_Detailed_Estimation.pdf',
+    referenceArea: 'Reference built-up area',
+    referenceReinforcement: 'Reinforcement',
+    referenceBrickMasonry: 'Brick masonry',
+    referencePlaster: 'Plaster',
+    referenceCost: 'Reference construction cost',
     localBudget: '03 / LOCAL BUDGET',
     makeEstimateYours: 'Make the estimate yours',
     supplierQuotes: 'Add supplier quotes for',
@@ -145,6 +160,14 @@ const translations: Record<Language, Record<string, string>> = {
     project: '01 / మీ ప్రాజెక్ట్',
     startBasics: 'ప్రాథమిక వివరాలు',
     projectCopy: 'కొన్ని వివరాలు మెటీరియల్ పరిమాణాలను నిర్ణయిస్తాయి.',
+    planDocument: 'ప్లాన్ లేదా మోడల్ PDF',
+    planDocumentCopy: 'సూచన కోసం ఆమోదిత ప్లాన్ లేదా మోడల్‌ను జోడించండి.',
+    choosePdf: 'PDF ఎంచుకోండి',
+    removePdf: 'తొలగించండి',
+    pdfOnlyError: 'దయచేసి PDF ఫైల్‌ను ఎంచుకోండి.',
+    pdfSizeError: 'PDF పరిమాణం 25 MB లేదా అంతకంటే తక్కువగా ఉండాలి.',
+    pdfAttached: 'జోడించబడింది',
+    pdfLocalNote: 'ఈ ఫైల్ ఈ సెషన్‌లో మీ బ్రౌజర్లోనే ఉంటుంది.',
     city: 'నగరం / స్థానిక మార్కెట్',
     cityPlaceholder: 'ఉదా. విజయవాడ, ఆంధ్రప్రదేశ్',
     plotArea: 'స్థల విస్తీర్ణం',
@@ -159,6 +182,13 @@ const translations: Record<Language, Record<string, string>> = {
     reset: 'రీసెట్',
     printEstimate: 'అంచనాను ప్రింట్ చేయండి',
     estimateDisclaimer: 'ఇవి సూచనాత్మక అంచనాలు మాత్రమే; నిర్మాణ స్పెసిఫికేషన్ కాదు. వాస్తవ అవసరాలు డిజైన్, నేల, నిర్మాణ ఇంజినీరింగ్ మరియు సైట్ పరిస్థితులపై ఆధారపడి ఉంటాయి. మెటీరియల్స్ కొనుగోలు ముందు అర్హత కలిగిన ఇంజినీర్‌ను సంప్రదించండి.',
+    referenceEstimate: 'PDF సూచన పారామీటర్లు',
+    referenceEstimateCopy: 'CH_Srinivas_Rao_Detailed_Estimation.pdf ఆధారంగా',
+    referenceArea: 'సూచన నిర్మిత విస్తీర్ణం',
+    referenceReinforcement: 'రీన్‌ఫోర్స్‌మెంట్',
+    referenceBrickMasonry: 'ఇటుక మేస్త్రీ',
+    referencePlaster: 'ప్లాస్టరింగ్',
+    referenceCost: 'సూచన నిర్మాణ ఖర్చు',
     localBudget: '03 / స్థానిక బడ్జెట్',
     makeEstimateYours: 'మీ అంచనాను రూపొందించండి',
     supplierQuotes: 'సరఫరాదారుల ధరలను నమోదు చేయండి:',
@@ -282,6 +312,30 @@ export interface MaterialItem {
   tip: string;
 }
 
+export interface EstimationReference {
+  sourceName: string;
+  floors: number;
+  areaPerFloorSqFt: number;
+  referenceAreaSqFt: number;
+  reinforcementKg: number;
+  reinforcementKgPerSqFt: number;
+  brickMasonryCum: number;
+  plasterSqm: number;
+  totalCost: number;
+}
+
+export const ESTIMATION_REFERENCE: EstimationReference = {
+  sourceName: 'CH_Srinivas_Rao_Detailed_Estimation.pdf',
+  floors: 3,
+  areaPerFloorSqFt: 376,
+  referenceAreaSqFt: 1128,
+  reinforcementKg: 3887,
+  reinforcementKgPerSqFt: 3887 / 1128,
+  brickMasonryCum: 40.59,
+  plasterSqm: 176.47,
+  totalCost: 3300000
+};
+
 interface ChecklistItem {
   id: string;
   text: string;
@@ -314,6 +368,9 @@ interface MaterialCostLine {
 export class AppComponent {
   language = signal<Language>(getStoredLanguage());
   installPrompt = signal<PwaInstallPromptEvent | null>(null);
+  planPdf = signal<File | null>(null);
+  planPdfError = signal('');
+  readonly estimationReference = ESTIMATION_REFERENCE;
 
   // Layman Inputs
   plotAreaSft = signal<number>(1200);
@@ -411,8 +468,8 @@ export class AppComponent {
     const cement50kg = Math.round(area * 0.42);
     const cement25kg = Math.round(area * 0.84);
 
-    // 2. Steel: ~3.8 kg per sft (0.0038 MT/sft)
-    const steelKg = Math.round(area * 3.8);
+    // 2. Steel: calibrated from the 3,887 kg reinforcement in the reference PDF
+    const steelKg = Math.round(area * ESTIMATION_REFERENCE.reinforcementKgPerSqFt);
     const steelTonnes = Number((steelKg / 1000).toFixed(2));
 
     // 3. Sand: 1.8 cft per sft (1 Unit / Brass = 100 cft ~ 4.2 Tons)
@@ -641,7 +698,46 @@ export class AppComponent {
     this.floors.set(0);
     this.brickType.set('clay');
     this.city.set('');
+    this.planPdf.set(null);
+    this.planPdfError.set('');
     this.materialRates.set({ cement: 0, steel: 0, sand: 0, stone: 0, bricks: 0 });
+  }
+
+  onPlanPdfSelected(event: Event): void {
+    const input = event.target as HTMLInputElement;
+    const file = input.files?.item(0);
+    if (!file) {
+      return;
+    }
+
+    if (file.type !== 'application/pdf' && !file.name.toLowerCase().endsWith('.pdf')) {
+      this.planPdf.set(null);
+      this.planPdfError.set(this.t('pdfOnlyError'));
+      input.value = '';
+      return;
+    }
+
+    if (file.size > 25 * 1024 * 1024) {
+      this.planPdf.set(null);
+      this.planPdfError.set(this.t('pdfSizeError'));
+      input.value = '';
+      return;
+    }
+
+    this.planPdf.set(file);
+    this.planPdfError.set('');
+  }
+
+  removePlanPdf(): void {
+    this.planPdf.set(null);
+    this.planPdfError.set('');
+  }
+
+  formatPdfSize(bytes: number): string {
+    if (bytes < 1024 * 1024) {
+      return `${Math.max(1, Math.ceil(bytes / 1024))} KB`;
+    }
+    return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
   }
 
   toggleChecklistItem(phaseId: string, itemId: string): void {

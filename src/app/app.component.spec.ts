@@ -55,7 +55,7 @@ describe('AppComponent', () => {
     app.plotAreaSft.set(1000);
     app.floors.set(2);
 
-    expect(app.estimates().map(item => item.primaryQty)).toEqual([840, 7.6, 36, 27, 17000]);
+    expect(app.estimates().map(item => item.primaryQty)).toEqual([840, 6.89, 36, 27, 17000]);
     expect(app.translatedEstimates().map(item => item.name)).toEqual([
       'Cement Bags (50 kg)',
       'TMT Steel Rebars',
@@ -107,11 +107,15 @@ describe('AppComponent', () => {
 
     app.city.set('Pune');
     app.brickType.set('cement');
+    app.planPdf.set(new File(['plan'], 'plan.pdf', { type: 'application/pdf' }));
+    app.planPdfError.set('some error');
     app.resetForm();
     expect(app.plotAreaSft()).toBe(1200);
     expect(app.floors()).toBe(0);
     expect(app.brickType()).toBe('clay');
     expect(app.city()).toBe('');
+    expect(app.planPdf()).toBeNull();
+    expect(app.planPdfError()).toBe('');
     expect(app.materialRates()).toEqual({ cement: 0, steel: 0, sand: 0, stone: 0, bricks: 0 });
   });
 
@@ -120,6 +124,60 @@ describe('AppComponent', () => {
     app.translatedEstimates = computed(() => []);
 
     expect(() => app.materialCostLines()).toThrow('Missing material estimate for cement');
+  });
+
+  it('accepts and validates plan PDF uploads', () => {
+    const app = new AppComponent();
+    const validPdf = new File(['plan'], 'floor-plan.pdf', { type: 'application/pdf' });
+    const validInput = document.createElement('input');
+    validInput.type = 'file';
+    Object.defineProperty(validInput, 'files', {
+      value: { item: () => validPdf }
+    });
+
+    app.onPlanPdfSelected({ target: validInput } as unknown as Event);
+
+    expect(app.planPdf()).toBe(validPdf);
+    expect(app.planPdfError()).toBe('');
+    expect(app.formatPdfSize(validPdf.size)).toBe('1 KB');
+    expect(app.formatPdfSize(2 * 1024 * 1024)).toBe('2.0 MB');
+
+    const emptyInput = document.createElement('input');
+    emptyInput.type = 'file';
+    Object.defineProperty(emptyInput, 'files', {
+      value: { item: () => null }
+    });
+    app.onPlanPdfSelected({ target: emptyInput } as unknown as Event);
+    expect(app.planPdf()).toBe(validPdf);
+
+    const invalidInput = document.createElement('input');
+    invalidInput.type = 'file';
+    const invalidFile = new File(['drawing'], 'drawing.png', { type: 'image/png' });
+    Object.defineProperty(invalidInput, 'files', {
+      value: { item: () => invalidFile }
+    });
+
+    app.onPlanPdfSelected({ target: invalidInput } as unknown as Event);
+
+    expect(app.planPdf()).toBeNull();
+    expect(app.planPdfError()).toBe('Please choose a PDF file.');
+
+    const oversizedPdf = new File(['plan'], 'large-plan.pdf', { type: 'application/pdf' });
+    Object.defineProperty(oversizedPdf, 'size', { value: 26 * 1024 * 1024 });
+    const oversizedInput = document.createElement('input');
+    oversizedInput.type = 'file';
+    Object.defineProperty(oversizedInput, 'files', {
+      value: { item: () => oversizedPdf }
+    });
+
+    app.onPlanPdfSelected({ target: oversizedInput } as unknown as Event);
+
+    expect(app.planPdf()).toBeNull();
+    expect(app.planPdfError()).toBe('The PDF must be 25 MB or smaller.');
+
+    app.removePlanPdf();
+    expect(app.planPdf()).toBeNull();
+    expect(app.planPdfError()).toBe('');
   });
 
   it('translates checklist items and toggles only the requested item', () => {

@@ -113,6 +113,44 @@
         </select>
       </div>
 
+      <div class="plan-upload mt-6">
+        <div>
+          <label for="plan-pdf" class="field-label">{{ t('planDocument') }}</label>
+          <p class="plan-upload-copy">{{ t('planDocumentCopy') }}</p>
+        </div>
+        <input
+          #planPdfInput
+          id="plan-pdf"
+          class="sr-only"
+          type="file"
+          accept="application/pdf,.pdf"
+          (change)="onPlanPdfSelected($event)">
+        @if (planPdf(); as pdf) {
+          <div class="plan-upload-selected" aria-live="polite">
+            <div>
+              <span class="plan-upload-status">{{ t('pdfAttached') }}</span>
+              <strong>{{ pdf.name }}</strong>
+              <span>{{ formatPdfSize(pdf.size) }}</span>
+            </div>
+            <button
+              class="plan-upload-remove"
+              type="button"
+              (click)="removePlanPdf(); planPdfInput.value = ''">
+              {{ t('removePdf') }}
+            </button>
+          </div>
+        } @else {
+          <label for="plan-pdf" class="secondary-button plan-upload-button">
+            {{ t('choosePdf') }}
+          </label>
+        }
+        @if (planPdfError()) {
+          <p class="plan-upload-error" role="alert">{{ planPdfError() }}</p>
+        } @else {
+          <p class="plan-upload-note">{{ t('pdfLocalNote') }}</p>
+        }
+      </div>
+
       <div class="built-area-card mt-6">
         <span class="built-area-icon" aria-hidden="true">▦</span>
         <div>
@@ -157,6 +195,34 @@
       <p class="disclaimer mt-4">
         {{ t('estimateDisclaimer') }}
       </p>
+      <aside class="surface-panel mt-4 reference-estimate" aria-label="{{ t('referenceEstimate') }}">
+        <div class="panel-heading">
+          <span class="section-kicker">{{ t('referenceEstimate') }}</span>
+          <p class="section-copy">{{ t('referenceEstimateCopy') }}</p>
+        </div>
+        <dl class="grid gap-3 sm:grid-cols-2 lg:grid-cols-5">
+          <div>
+            <dt>{{ t('referenceArea') }}</dt>
+            <dd>{{ estimationReference.referenceAreaSqFt | number }} sq. ft. ({{ estimationReference.floors }} floors)</dd>
+          </div>
+          <div>
+            <dt>{{ t('referenceReinforcement') }}</dt>
+            <dd>{{ estimationReference.reinforcementKg | number }} kg</dd>
+          </div>
+          <div>
+            <dt>{{ t('referenceBrickMasonry') }}</dt>
+            <dd>{{ estimationReference.brickMasonryCum | number:'1.2-2' }} cum</dd>
+          </div>
+          <div>
+            <dt>{{ t('referencePlaster') }}</dt>
+            <dd>{{ estimationReference.plasterSqm | number:'1.2-2' }} sqm</dd>
+          </div>
+          <div>
+            <dt>{{ t('referenceCost') }}</dt>
+            <dd>{{ estimationReference.totalCost | currency:'INR':'symbol':'1.0-0':'en-IN' }}</dd>
+          </div>
+        </dl>
+      </aside>
     </section>
   </section>
 

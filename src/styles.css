@@ -334,6 +334,79 @@ select {
   background: #0c1a26;
 }
 
+.plan-upload {
+  border: 1px solid #324a5b;
+  border-radius: 0.9rem;
+  background: rgba(12, 26, 38, 0.5);
+  padding: 0.85rem;
+}
+
+.plan-upload-copy,
+.plan-upload-note {
+  color: #8296a3;
+  font-size: 0.75rem;
+  line-height: 1.5;
+}
+
+.plan-upload-copy {
+  margin-top: 0.35rem;
+}
+
+.plan-upload-button {
+  display: inline-flex;
+  margin-top: 0.75rem;
+  cursor: pointer;
+}
+
+.plan-upload-selected {
+  align-items: center;
+  border: 1px solid #36566a;
+  border-radius: 0.75rem;
+  display: flex;
+  gap: 0.75rem;
+  justify-content: space-between;
+  margin-top: 0.75rem;
+  padding: 0.65rem 0.75rem;
+}
+
+.plan-upload-selected div {
+  display: grid;
+  min-width: 0;
+}
+
+.plan-upload-selected strong {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.plan-upload-selected span {
+  color: #8296a3;
+  font-size: 0.72rem;
+}
+
+.plan-upload-status {
+  color: #59cdb1 !important;
+  font-weight: 700;
+  text-transform: uppercase;
+}
+
+.plan-upload-remove {
+  color: #f4aa8a;
+  font-size: 0.75rem;
+  white-space: nowrap;
+}
+
+.plan-upload-note {
+  margin-top: 0.55rem;
+}
+
+.plan-upload-error {
+  color: #f4aa8a;
+  font-size: 0.75rem;
+  margin-top: 0.55rem;
+}
+
 .built-area-card {
   display: flex;
   align-items: center;
@@ -533,6 +606,24 @@ select {
   color: #8296a3;
   font-size: 0.7rem;
   line-height: 1.65;
+}
+
+.reference-estimate {
+  padding: clamp(1rem, 2.5vw, 1.35rem);
+}
+
+.reference-estimate dt {
+  color: #8296a3;
+  font-size: 0.68rem;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+.reference-estimate dd {
+  margin-top: 0.25rem;
+  color: #dce6e9;
+  font-size: 0.82rem;
+  font-weight: 700;
 }
 
 .cost-panel {
