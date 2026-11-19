@@ -90,6 +90,20 @@ describe('AppComponent', () => {
     });
   });
 
+  it('builds the example 3D model dimensions from the active floor and area inputs', () => {
+    const app = new AppComponent();
+    app.plotAreaSft.set(376);
+    app.floors.set(3);
+
+    expect(app.modelFloors()).toEqual([0, 1, 2]);
+    expect(app.modelFrontTop()).toBe(82);
+    expect(app.modelSideTop()).toBe(44);
+    expect(app.modelFootprintText()).toBe('376 sq. ft. / floor');
+
+    app.setModelView('side');
+    expect(app.modelView()).toBe('side');
+  });
+
   it('uses the uploaded plan area and floor count to generate the estimate', async () => {
     const file = new File(['plan'], 'house-plan.pdf', { type: 'application/pdf' });
     const summary: PlanSummary = { totalAreaSqFt: 1127.63, floors: 3 };

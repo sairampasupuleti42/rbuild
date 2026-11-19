@@ -36,6 +36,15 @@ const translations: Record<Language, Record<string, string>> = {
     projectCopy: 'A few details shape your material quantities.',
     planDocument: 'Plan or model PDF',
     planDocumentCopy: 'Attach a text-searchable floor-plan PDF. Its area statement is read locally when you generate the estimate.',
+    modelPreview: 'Example 3D house preview',
+    modelPreviewCopy: 'A conceptual model generated from the plan area and floor count. It is for visualization, not a construction drawing.',
+    modelFloorCount: 'Floors',
+    modelFootprint: 'Footprint',
+    modelView: 'View',
+    modelIsometric: 'Isometric',
+    modelFront: 'Front',
+    modelSide: 'Side',
+    modelConceptNote: 'Example model only — dimensions, openings, structure, and roof need verification against an architect-approved plan.',
     choosePdf: 'Choose PDF',
     removePdf: 'Remove',
     generateEstimate: 'Generate estimate from plan',
@@ -171,6 +180,15 @@ const translations: Record<Language, Record<string, string>> = {
     projectCopy: 'కొన్ని వివరాలు మెటీరియల్ పరిమాణాలను నిర్ణయిస్తాయి.',
     planDocument: 'ప్లాన్ లేదా మోడల్ PDF',
     planDocumentCopy: 'టెక్స్ట్ శోధించగల ఫ్లోర్ ప్లాన్ PDFను జోడించండి. అంచనా రూపొందించినప్పుడు దాని విస్తీర్ణ వివరాలు మీ బ్రౌజర్‌లోనే చదవబడతాయి.',
+    modelPreview: 'ఉదాహరణ 3D ఇంటి ప్రివ్యూ',
+    modelPreviewCopy: 'ప్లాన్ విస్తీర్ణం మరియు అంతస్తుల ఆధారంగా రూపొందించిన ఊహాత్మక మోడల్. ఇది విజువలైజేషన్ కోసం మాత్రమే; నిర్మాణ డ్రాయింగ్ కాదు.',
+    modelFloorCount: 'అంతస్తులు',
+    modelFootprint: 'పాదముద్ర',
+    modelView: 'దృశ్యం',
+    modelIsometric: 'ఐసోమెట్రిక్',
+    modelFront: 'ముందువైపు',
+    modelSide: 'పక్కవైపు',
+    modelConceptNote: 'ఉదాహరణ మోడల్ మాత్రమే — కొలతలు, తలుపులు, కిటికీలు, నిర్మాణం మరియు పైకప్పును వాస్తుశిల్పి ఆమోదించిన ప్లాన్‌తో నిర్ధారించాలి.',
     choosePdf: 'PDF ఎంచుకోండి',
     removePdf: 'తొలగించండి',
     generateEstimate: 'ప్లాన్ ఆధారంగా అంచనా రూపొందించండి',
@@ -401,6 +419,7 @@ export class AppComponent {
   estimateError = signal('');
   isEstimating = signal(false);
   planEstimate = signal<PlanSummary | null>(null);
+  modelView = signal<'isometric' | 'front' | 'side'>('isometric');
   readonly estimationReference = ESTIMATION_REFERENCE;
   private estimateAttempt = 0;
 
@@ -493,6 +512,26 @@ export class AppComponent {
   totalBuiltUpArea = computed(() =>
     this.planEstimate()?.totalAreaSqFt ?? (this.plotAreaSft() || 0) * this.floors()
   );
+
+  modelFloors = computed(() => {
+    const count = Math.min(5, Math.max(1, this.floors() || 1));
+    return Array.from({ length: count }, (_, index) => index);
+  });
+
+  modelFloorHeight = computed(() => 46);
+  modelFrontTop = computed(() => 220 - this.modelFloors().length * this.modelFloorHeight());
+  modelSideTop = computed(() => this.modelFrontTop() - 38);
+  modelFootprintText = computed(() => {
+    const perFloor = this.plotAreaSft() || 0;
+    if (!perFloor) {
+      return '0 sq. ft.';
+    }
+    return `${Math.round(perFloor).toLocaleString('en-IN')} sq. ft. / floor`;
+  });
+
+  setModelView(view: 'isometric' | 'front' | 'side'): void {
+    this.modelView.set(view);
+  }
 
   scaledReferenceParameters = computed(() => {
     const scale = this.totalBuiltUpArea() / ESTIMATION_REFERENCE.referenceAreaSqFt;

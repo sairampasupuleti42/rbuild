@@ -234,6 +234,171 @@
     </section>
   </section>
 
+  <section class="surface-panel model-panel mt-8 sm:mt-10" aria-labelledby="model-heading">
+    <div class="model-panel-heading">
+      <div class="panel-heading">
+        <span class="section-kicker">{{ t('modelPreview') }}</span>
+        <h2 id="model-heading" class="section-title">{{ t('modelPreview') }}</h2>
+        <p class="section-copy">{{ t('modelPreviewCopy') }}</p>
+      </div>
+      <div class="model-controls no-print" aria-label="{{ t('modelView') }}">
+        <button
+          type="button"
+          class="model-view-button"
+          [class.model-view-button-active]="modelView() === 'isometric'"
+          (click)="setModelView('isometric')">{{ t('modelIsometric') }}</button>
+        <button
+          type="button"
+          class="model-view-button"
+          [class.model-view-button-active]="modelView() === 'front'"
+          (click)="setModelView('front')">{{ t('modelFront') }}</button>
+        <button
+          type="button"
+          class="model-view-button"
+          [class.model-view-button-active]="modelView() === 'side'"
+          (click)="setModelView('side')">{{ t('modelSide') }}</button>
+      </div>
+    </div>
+
+    <div class="model-layout">
+      <div class="model-viewport" [attr.data-view]="modelView()">
+        <svg
+          class="house-model"
+          viewBox="0 0 380 280"
+          role="img"
+          [attr.aria-label]="t('modelPreview')"
+          xmlns="http://www.w3.org/2000/svg">
+          <defs>
+            <linearGradient id="frontWall" x1="0" y1="0" x2="1" y2="1">
+              <stop offset="0" stop-color="#e7dfd0"/>
+              <stop offset="1" stop-color="#b9b0a1"/>
+            </linearGradient>
+            <linearGradient id="sideWall" x1="0" y1="0" x2="1" y2="1">
+              <stop offset="0" stop-color="#aaa394"/>
+              <stop offset="1" stop-color="#756f66"/>
+            </linearGradient>
+            <linearGradient id="roofSlab" x1="0" y1="0" x2="1" y2="1">
+              <stop offset="0" stop-color="#8fd0bd"/>
+              <stop offset="1" stop-color="#4a8276"/>
+            </linearGradient>
+          </defs>
+
+          <ellipse cx="190" cy="238" rx="145" ry="28" fill="#06131b" opacity=".55"/>
+          <polygon
+            points="42,218 190,252 338,208 188,174"
+            fill="#173846"
+            stroke="#6b9d94"
+            stroke-width="2"/>
+          <polygon
+            points="48,214 188,244 320,205 188,182"
+            fill="#d0c5ad"
+            opacity=".82"/>
+
+          <polygon
+            [attr.points]="'78,' + modelFrontTop() + ' 228,' + modelFrontTop() + ' 228,220 78,220'"
+            fill="url(#frontWall)"
+            stroke="#7d786f"
+            stroke-width="2"/>
+          <polygon
+            [attr.points]="'228,' + modelFrontTop() + ' 300,' + modelSideTop() + ' 300,182 228,220'"
+            fill="url(#sideWall)"
+            stroke="#69655f"
+            stroke-width="2"/>
+
+          @for (floor of modelFloors(); track $index) {
+            <line
+              [attr.x1]="78"
+              [attr.x2]="228"
+              [attr.y1]="220 - ($index + 1) * modelFloorHeight()"
+              [attr.y2]="220 - ($index + 1) * modelFloorHeight()"
+              stroke="#777269"
+              stroke-width="2"
+              opacity=".72"/>
+            <rect
+              [attr.x]="96"
+              [attr.y]="220 - ($index + 1) * modelFloorHeight() + 13"
+              width="42"
+              height="22"
+              rx="2"
+              fill="#183b4a"
+              stroke="#a9ddd1"
+              stroke-width="2"/>
+            <rect
+              [attr.x]="158"
+              [attr.y]="220 - ($index + 1) * modelFloorHeight() + 13"
+              width="42"
+              height="22"
+              rx="2"
+              fill="#183b4a"
+              stroke="#a9ddd1"
+              stroke-width="2"/>
+            <polygon
+              [attr.points]="
+                '236,' + (220 - ($index + 1) * modelFloorHeight() + 15) +
+                ' 288,' + (220 - ($index + 1) * modelFloorHeight() - 20) +
+                ' 288,' + (220 - ($index + 1) * modelFloorHeight() + 1) +
+                ' 236,' + (220 - ($index + 1) * modelFloorHeight() + 36)
+              "
+              fill="#183b4a"
+              stroke="#9bd0c3"
+              stroke-width="2"/>
+          }
+
+          <rect
+            [attr.x]="184"
+            [attr.y]="220 - modelFloorHeight()"
+            width="30"
+            height="46"
+            fill="#6c5844"
+            stroke="#c7b899"
+            stroke-width="2"/>
+
+          <polygon
+            [attr.points]="'78,' + modelFrontTop() + ' 150,' + (modelFrontTop() - 38) + ' 300,' + modelSideTop() + ' 228,' + modelFrontTop()"
+            fill="url(#roofSlab)"
+            stroke="#37675f"
+            stroke-width="3"/>
+          <polygon
+            [attr.points]="'78,' + modelFrontTop() + ' 228,' + modelFrontTop() + ' 228,' + (modelFrontTop() + 12) + ' 78,' + (modelFrontTop() + 12)"
+            fill="#5f9a8c"
+            stroke="#37675f"
+            stroke-width="2"/>
+          <polygon
+            [attr.points]="
+              '228,' + modelFrontTop() + ' 300,' + modelSideTop() +
+              ' 300,' + (modelSideTop() + 12) + ' 228,' + (modelFrontTop() + 12)
+            "
+            fill="#416f65"
+            stroke="#37675f"
+            stroke-width="2"/>
+
+          <path d="M56 188 C74 178 92 178 110 188" fill="none" stroke="#78a56d" stroke-width="5"/>
+          <circle cx="55" cy="188" r="12" fill="#4d7d4f"/>
+          <circle cx="76" cy="182" r="14" fill="#5d9260"/>
+          <circle cx="99" cy="184" r="11" fill="#4d7d4f"/>
+        </svg>
+      </div>
+
+      <aside class="model-details">
+        <dl>
+          <div>
+            <dt>{{ t('modelFootprint') }}</dt>
+            <dd>{{ modelFootprintText() }}</dd>
+          </div>
+          <div>
+            <dt>{{ t('modelFloorCount') }}</dt>
+            <dd>{{ modelFloors().length }}</dd>
+          </div>
+          <div>
+            <dt>{{ t('referenceArea') }}</dt>
+            <dd>{{ totalBuiltUpArea() | number:'1.0-0' }} sq. ft.</dd>
+          </div>
+        </dl>
+        <p class="model-concept-note">{{ t('modelConceptNote') }}</p>
+      </aside>
+    </div>
+  </section>
+
   <section id="cost-planner" class="surface-panel cost-panel mt-8 sm:mt-10" aria-labelledby="cost-heading">
     <div class="cost-heading">
       <div class="panel-heading">
