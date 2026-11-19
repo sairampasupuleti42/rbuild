@@ -1,6 +1,7 @@
-import { Component, HostListener, signal, computed } from '@angular/core';
+import { Component, HostListener, signal, computed, Inject, InjectionToken } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { extractPlanSummary, PlanExtractionError, PlanExtractionErrorCode, PlanSummary } from './plan-estimator';
 
 type MaterialRateId = 'cement' | 'steel' | 'sand' | 'stone' | 'bricks';
 type Language = 'en' | 'te';
@@ -25,7 +26,7 @@ const translations: Record<Language, Record<string, string>> = {
     dismissInstallPrompt: 'Not now',
     brandTagline: 'BUILT FOR INDIAN HOMES',
     heroTitle: 'A clearer plan for your build.',
-    heroCopy: 'Turn your home plans into a practical material estimate and a local budget you can take to your supplier.',
+    heroCopy: 'Upload a text-readable floor plan to estimate built-up area and construction quantities from the reference estimate, then add local supplier rates for a project budget.',
     planBudget: 'Plan your budget',
     projectSnapshot: 'PROJECT SNAPSHOT',
     builtUpArea: 'sq. ft. built-up area',
@@ -34,16 +35,24 @@ const translations: Record<Language, Record<string, string>> = {
     startBasics: 'Start with the basics',
     projectCopy: 'A few details shape your material quantities.',
     planDocument: 'Plan or model PDF',
-    planDocumentCopy: 'Attach an approved plan or model for reference.',
+    planDocumentCopy: 'Attach a text-searchable floor-plan PDF. Its area statement is read locally when you generate the estimate.',
     choosePdf: 'Choose PDF',
     removePdf: 'Remove',
+    generateEstimate: 'Generate estimate from plan',
+    generatingEstimate: 'Reading plan…',
+    estimatePlanRequired: 'Choose a floor-plan PDF before generating an estimate.',
+    planUnreadable: 'Could not read this PDF. Use a valid, text-searchable floor-plan PDF; scanned image-only plans are not supported.',
+    planMissingArea: 'No total built-up area was found. Add an area statement to the plan or enter the area and floors manually.',
+    planMissingFloors: 'No floor count was found. Include floor names (for example, Ground Floor) in the plan.',
+    planEstimateReady: 'Plan read successfully. Quantities below use its built-up area and the reference estimate parameters.',
+    planPdfLocalNote: 'The PDF is processed only in your browser and is not uploaded.',
     pdfOnlyError: 'Please choose a PDF file.',
     pdfSizeError: 'The PDF must be 25 MB or smaller.',
     pdfAttached: 'Attached',
     pdfLocalNote: 'This file stays in your browser for this session.',
     city: 'City / local market',
     cityPlaceholder: 'e.g. Pune, Maharashtra',
-    plotArea: 'Plot area',
+    plotArea: 'Built-up area per floor',
     floors: 'Number of floors',
     wallMaterial: 'Wall material',
     clayOption: 'Red clay bricks',
@@ -56,8 +65,8 @@ const translations: Record<Language, Record<string, string>> = {
     printEstimate: 'Print estimate',
     estimateDisclaimer: 'Indicative estimates only—not a construction specification. Actual requirements vary by design, soil, structural engineering, and site conditions. Consult a qualified engineer before purchasing materials.',
     referenceEstimate: 'Reference PDF parameters',
-    referenceEstimateCopy: 'Calibrated from CH_Srinivas_Rao_Detailed_Estimation.pdf',
-    referenceArea: 'Reference built-up area',
+    referenceEstimateCopy: 'Measurements and the indicative budget from CH_Srinivas_Rao_Detailed_Estimation.pdf are scaled to this plan area, not quoted as local prices.',
+    referenceArea: 'Plan built-up area',
     referenceReinforcement: 'Reinforcement',
     referenceBrickMasonry: 'Brick masonry',
     referencePlaster: 'Plaster',
@@ -152,7 +161,7 @@ const translations: Record<Language, Record<string, string>> = {
     dismissInstallPrompt: 'ఇప్పుడొద్దు',
     brandTagline: 'భారతీయ గృహాల కోసం',
     heroTitle: 'మీ నిర్మాణానికి స్పష్టమైన ప్రణాళిక.',
-    heroCopy: 'మీ ఇంటి ప్రణాళికలను ఆచరణాత్మక మెటీరియల్ అంచనా మరియు స్థానిక బడ్జెట్‌గా మార్చుకోండి.',
+    heroCopy: 'టెక్స్ట్ చదవగలిగే ఫ్లోర్ ప్లాన్‌ను అప్‌లోడ్ చేసి, సూచన అంచనా ఆధారంగా నిర్మిత విస్తీర్ణం మరియు మెటీరియల్ పరిమాణాలను లెక్కించండి; స్థానిక సరఫరాదారుల ధరలతో బడ్జెట్ రూపొందించండి.',
     planBudget: 'బడ్జెట్ రూపొందించండి',
     projectSnapshot: 'ప్రాజెక్ట్ వివరాలు',
     builtUpArea: 'చ.అ. నిర్మిత విస్తీర్ణం',
@@ -161,16 +170,24 @@ const translations: Record<Language, Record<string, string>> = {
     startBasics: 'ప్రాథమిక వివరాలు',
     projectCopy: 'కొన్ని వివరాలు మెటీరియల్ పరిమాణాలను నిర్ణయిస్తాయి.',
     planDocument: 'ప్లాన్ లేదా మోడల్ PDF',
-    planDocumentCopy: 'సూచన కోసం ఆమోదిత ప్లాన్ లేదా మోడల్‌ను జోడించండి.',
+    planDocumentCopy: 'టెక్స్ట్ శోధించగల ఫ్లోర్ ప్లాన్ PDFను జోడించండి. అంచనా రూపొందించినప్పుడు దాని విస్తీర్ణ వివరాలు మీ బ్రౌజర్‌లోనే చదవబడతాయి.',
     choosePdf: 'PDF ఎంచుకోండి',
     removePdf: 'తొలగించండి',
+    generateEstimate: 'ప్లాన్ ఆధారంగా అంచనా రూపొందించండి',
+    generatingEstimate: 'ప్లాన్ చదువుతోంది…',
+    estimatePlanRequired: 'అంచనా రూపొందించే ముందు ఫ్లోర్ ప్లాన్ PDFను ఎంచుకోండి.',
+    planUnreadable: 'ఈ PDFను చదవలేకపోయాము. చెల్లుబాటు అయ్యే, టెక్స్ట్ శోధించగల ఫ్లోర్ ప్లాన్ PDFను ఉపయోగించండి; స్కాన్ చేసిన చిత్రాలు మద్దతు ఇవ్వవు.',
+    planMissingArea: 'మొత్తం నిర్మిత విస్తీర్ణం కనబడలేదు. ప్లాన్‌లో విస్తీర్ణ వివరాలు చేర్చండి లేదా విస్తీర్ణం, అంతస్తులను మాన్యువల్‌గా నమోదు చేయండి.',
+    planMissingFloors: 'అంతస్తుల సంఖ్య కనబడలేదు. ప్లాన్‌లో అంతస్తుల పేర్లు (ఉదా. గ్రౌండ్ ఫ్లోర్) చేర్చండి.',
+    planEstimateReady: 'ప్లాన్ విజయవంతంగా చదవబడింది. దిగువ పరిమాణాలు దాని నిర్మిత విస్తీర్ణం మరియు సూచన అంచనా పారామీటర్ల ఆధారంగా ఉన్నాయి.',
+    planPdfLocalNote: 'PDF మీ బ్రౌజర్‌లో మాత్రమే ప్రాసెస్ చేయబడుతుంది; అప్‌లోడ్ చేయబడదు.',
     pdfOnlyError: 'దయచేసి PDF ఫైల్‌ను ఎంచుకోండి.',
     pdfSizeError: 'PDF పరిమాణం 25 MB లేదా అంతకంటే తక్కువగా ఉండాలి.',
     pdfAttached: 'జోడించబడింది',
     pdfLocalNote: 'ఈ ఫైల్ ఈ సెషన్‌లో మీ బ్రౌజర్లోనే ఉంటుంది.',
     city: 'నగరం / స్థానిక మార్కెట్',
     cityPlaceholder: 'ఉదా. విజయవాడ, ఆంధ్రప్రదేశ్',
-    plotArea: 'స్థల విస్తీర్ణం',
+    plotArea: 'ప్రతి అంతస్తు నిర్మిత విస్తీర్ణం',
     floors: 'అంతస్తుల సంఖ్య',
     wallMaterial: 'గోడల మెటీరియల్',
     clayOption: 'ఎర్ర మట్టి ఇటుకలు',
@@ -183,8 +200,8 @@ const translations: Record<Language, Record<string, string>> = {
     printEstimate: 'అంచనాను ప్రింట్ చేయండి',
     estimateDisclaimer: 'ఇవి సూచనాత్మక అంచనాలు మాత్రమే; నిర్మాణ స్పెసిఫికేషన్ కాదు. వాస్తవ అవసరాలు డిజైన్, నేల, నిర్మాణ ఇంజినీరింగ్ మరియు సైట్ పరిస్థితులపై ఆధారపడి ఉంటాయి. మెటీరియల్స్ కొనుగోలు ముందు అర్హత కలిగిన ఇంజినీర్‌ను సంప్రదించండి.',
     referenceEstimate: 'PDF సూచన పారామీటర్లు',
-    referenceEstimateCopy: 'CH_Srinivas_Rao_Detailed_Estimation.pdf ఆధారంగా',
-    referenceArea: 'సూచన నిర్మిత విస్తీర్ణం',
+    referenceEstimateCopy: 'CH_Srinivas_Rao_Detailed_Estimation.pdf లోని కొలతలు, సూచన ఖర్చు ఈ ప్లాన్ విస్తీర్ణానికి అనుగుణంగా లెక్కించబడతాయి; ఇవి స్థానిక ధరలు కావు.',
+    referenceArea: 'ప్లాన్ నిర్మిత విస్తీర్ణం',
     referenceReinforcement: 'రీన్‌ఫోర్స్‌మెంట్',
     referenceBrickMasonry: 'ఇటుక మేస్త్రీ',
     referencePlaster: 'ప్లాస్టరింగ్',
@@ -336,6 +353,17 @@ export const ESTIMATION_REFERENCE: EstimationReference = {
   totalCost: 3300000
 };
 
+const REFERENCE_BRICKS_PER_CUBIC_METRE = 500;
+const PLAN_EXTRACTION_ERROR_KEYS: Record<PlanExtractionErrorCode, string> = {
+  unreadable: 'planUnreadable',
+  'missing-area': 'planMissingArea',
+  'missing-floors': 'planMissingFloors'
+};
+const PLAN_SUMMARY_READER = new InjectionToken<(file: File) => Promise<PlanSummary>>(
+  'PLAN_SUMMARY_READER',
+  { providedIn: 'root', factory: () => extractPlanSummary }
+);
+
 interface ChecklistItem {
   id: string;
   text: string;
@@ -370,7 +398,11 @@ export class AppComponent {
   installPrompt = signal<PwaInstallPromptEvent | null>(null);
   planPdf = signal<File | null>(null);
   planPdfError = signal('');
+  estimateError = signal('');
+  isEstimating = signal(false);
+  planEstimate = signal<PlanSummary | null>(null);
   readonly estimationReference = ESTIMATION_REFERENCE;
+  private estimateAttempt = 0;
 
   // Layman Inputs
   plotAreaSft = signal<number>(1200);
@@ -458,7 +490,24 @@ export class AppComponent {
   );
 
   // Total Slab / Built-up Area
-  totalBuiltUpArea = computed(() => (this.plotAreaSft() || 0) * this.floors());
+  totalBuiltUpArea = computed(() =>
+    this.planEstimate()?.totalAreaSqFt ?? (this.plotAreaSft() || 0) * this.floors()
+  );
+
+  scaledReferenceParameters = computed(() => {
+    const scale = this.totalBuiltUpArea() / ESTIMATION_REFERENCE.referenceAreaSqFt;
+    return {
+      reinforcementKg: Math.round(ESTIMATION_REFERENCE.reinforcementKg * scale),
+      brickMasonryCum: ESTIMATION_REFERENCE.brickMasonryCum * scale,
+      plasterSqm: ESTIMATION_REFERENCE.plasterSqm * scale,
+      totalCost: ESTIMATION_REFERENCE.totalCost * scale
+    };
+  });
+
+  constructor(
+    @Inject(PLAN_SUMMARY_READER)
+    private readonly readPlanSummary: (file: File) => Promise<PlanSummary> = extractPlanSummary
+  ) {}
 
   // Calculations based on Indian Construction Standards (IS Thumb Rules)
   estimates = computed<MaterialItem[]>(() => {
@@ -484,7 +533,14 @@ export class AppComponent {
 
     // 5. Bricks: Clay (~8.5 nos/sft) vs Cement Concrete Blocks (~1.4 blocks/sft)
     const isClay = this.brickType() === 'clay';
-    const brickCount = isClay ? Math.round(area * 8.5) : Math.round(area * 1.4);
+    const brickCount = isClay
+      ? Math.round(
+        area
+        * ESTIMATION_REFERENCE.brickMasonryCum
+        / ESTIMATION_REFERENCE.referenceAreaSqFt
+        * REFERENCE_BRICKS_PER_CUBIC_METRE
+      )
+      : Math.round(area * 1.4);
 
     return [
       {
@@ -694,13 +750,61 @@ export class AppComponent {
   }
 
   resetForm(): void {
+    this.estimateAttempt++;
+    this.isEstimating.set(false);
     this.plotAreaSft.set(1200);
     this.floors.set(0);
     this.brickType.set('clay');
     this.city.set('');
     this.planPdf.set(null);
     this.planPdfError.set('');
+    this.estimateError.set('');
+    this.planEstimate.set(null);
     this.materialRates.set({ cement: 0, steel: 0, sand: 0, stone: 0, bricks: 0 });
+  }
+
+  updatePlotArea(value: number): void {
+    this.clearPlanEstimate();
+    this.plotAreaSft.set(value || 0);
+  }
+
+  updateFloors(value: number): void {
+    this.clearPlanEstimate();
+    this.floors.set(value || 1);
+  }
+
+  async generateEstimate(): Promise<void> {
+    const file = this.planPdf();
+    if (!file) {
+      this.estimateError.set(this.t('estimatePlanRequired'));
+      return;
+    }
+
+    const attempt = ++this.estimateAttempt;
+    this.isEstimating.set(true);
+    this.estimateError.set('');
+    try {
+      const summary = await this.readPlanSummary(file);
+      if (attempt !== this.estimateAttempt || file !== this.planPdf()) {
+        return;
+      }
+
+      this.planEstimate.set(summary);
+      this.plotAreaSft.set(summary.totalAreaSqFt / summary.floors);
+      this.floors.set(summary.floors);
+    } catch (error) {
+      if (attempt !== this.estimateAttempt) {
+        return;
+      }
+      if (!(error instanceof PlanExtractionError)) {
+        throw error;
+      }
+      this.estimateError.set(this.t(PLAN_EXTRACTION_ERROR_KEYS[error.code]));
+    } finally {
+      if (attempt === this.estimateAttempt) {
+        this.isEstimating.set(false);
+      }
+    }
   }
 
   onPlanPdfSelected(event: Event): void {
@@ -711,26 +815,34 @@ export class AppComponent {
     }
 
     if (file.type !== 'application/pdf' && !file.name.toLowerCase().endsWith('.pdf')) {
+      this.invalidatePlanEstimate();
       this.planPdf.set(null);
       this.planPdfError.set(this.t('pdfOnlyError'));
+      this.estimateError.set('');
       input.value = '';
       return;
     }
 
     if (file.size > 25 * 1024 * 1024) {
+      this.invalidatePlanEstimate();
       this.planPdf.set(null);
       this.planPdfError.set(this.t('pdfSizeError'));
+      this.estimateError.set('');
       input.value = '';
       return;
     }
 
+    this.invalidatePlanEstimate();
     this.planPdf.set(file);
     this.planPdfError.set('');
+    this.estimateError.set('');
   }
 
   removePlanPdf(): void {
+    this.invalidatePlanEstimate();
     this.planPdf.set(null);
     this.planPdfError.set('');
+    this.estimateError.set('');
   }
 
   formatPdfSize(bytes: number): string {
@@ -750,5 +862,16 @@ export class AppComponent {
 
   print(): void {
     window.print();
+  }
+
+  private clearPlanEstimate(): void {
+    this.invalidatePlanEstimate();
+    this.estimateError.set('');
+  }
+
+  private invalidatePlanEstimate(): void {
+    this.estimateAttempt++;
+    this.isEstimating.set(false);
+    this.planEstimate.set(null);
   }
 }

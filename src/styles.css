@@ -487,6 +487,12 @@ select {
   background: #a0f0d1;
 }
 
+.primary-button:disabled {
+  cursor: wait;
+  opacity: 0.65;
+  transform: none;
+}
+
 .secondary-button {
   border: 1px solid #405667;
   background: rgb(255 255 255 / 3%);

@@ -2,6 +2,7 @@ import { computed } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { AppComponent } from './app.component';
+import { parsePlanText, PlanExtractionError, PlanSummary } from './plan-estimator';
 
 describe('AppComponent', () => {
   beforeEach(() => {
@@ -55,7 +56,7 @@ describe('AppComponent', () => {
     app.plotAreaSft.set(1000);
     app.floors.set(2);
 
-    expect(app.estimates().map(item => item.primaryQty)).toEqual([840, 6.89, 36, 27, 17000]);
+    expect(app.estimates().map(item => item.primaryQty)).toEqual([840, 6.89, 36, 27, 35984]);
     expect(app.translatedEstimates().map(item => item.name)).toEqual([
       'Cement Bags (50 kg)',
       'TMT Steel Rebars',
@@ -74,6 +75,98 @@ describe('AppComponent', () => {
     app.plotAreaSft.set(0);
     expect(app.totalBuiltUpArea()).toBe(0);
     expect(app.estimates().every(item => item.primaryQty === 0)).toBe(true);
+  });
+
+  it('scales the reference PDF quantities and cost to the active project area', () => {
+    const app = new AppComponent();
+    app.plotAreaSft.set(1000);
+    app.floors.set(2);
+
+    expect(app.scaledReferenceParameters()).toEqual({
+      reinforcementKg: 6892,
+      brickMasonryCum: 71.96808510638299,
+      plasterSqm: 312.8900709219858,
+      totalCost: 5851063.829787234
+    });
+  });
+
+  it('uses the uploaded plan area and floor count to generate the estimate', async () => {
+    const file = new File(['plan'], 'house-plan.pdf', { type: 'application/pdf' });
+    const summary: PlanSummary = { totalAreaSqFt: 1127.63, floors: 3 };
+    const readPlanSummary = vi.fn().mockResolvedValue(summary);
+    const appWithReader = new AppComponent(readPlanSummary);
+    appWithReader.planPdf.set(file);
+
+    await appWithReader.generateEstimate();
+
+    expect(readPlanSummary).toHaveBeenCalledWith(file);
+    expect(appWithReader.planEstimate()).toEqual(summary);
+    expect(appWithReader.plotAreaSft()).toBeCloseTo(1127.63 / 3);
+    expect(appWithReader.floors()).toBe(3);
+    expect(appWithReader.totalBuiltUpArea()).toBe(1127.63);
+    expect(appWithReader.isEstimating()).toBe(false);
+
+    appWithReader.updatePlotArea(400);
+    expect(appWithReader.planEstimate()).toBeNull();
+    expect(appWithReader.totalBuiltUpArea()).toBe(1200);
+    appWithReader.updateFloors(2);
+    expect(appWithReader.totalBuiltUpArea()).toBe(800);
+    appWithReader.updatePlotArea(0);
+    expect(appWithReader.totalBuiltUpArea()).toBe(0);
+    appWithReader.updateFloors(0);
+    expect(appWithReader.floors()).toBe(1);
+  });
+
+  it('reports missing plan and extraction errors, and rethrows unexpected errors', async () => {
+    const app = new AppComponent();
+    await app.generateEstimate();
+    expect(app.estimateError()).toBe('Choose a floor-plan PDF before generating an estimate.');
+
+    const file = new File(['plan'], 'house-plan.pdf', { type: 'application/pdf' });
+    const errorApp = new AppComponent(async () => {
+      throw new PlanExtractionError('missing-area');
+    });
+    errorApp.planPdf.set(file);
+    await errorApp.generateEstimate();
+    expect(errorApp.estimateError()).toContain('No total built-up area was found.');
+    expect(errorApp.isEstimating()).toBe(false);
+
+    const unexpectedErrorApp = new AppComponent(async () => {
+      throw new Error('unexpected extraction failure');
+    });
+    unexpectedErrorApp.planPdf.set(file);
+    await expect(unexpectedErrorApp.generateEstimate()).rejects.toThrow('unexpected extraction failure');
+    expect(unexpectedErrorApp.isEstimating()).toBe(false);
+  });
+
+  it('ignores a plan extraction result when its file or request has become stale', async () => {
+    const originalFile = new File(['first'], 'first.pdf', { type: 'application/pdf' });
+    const replacementFile = new File(['second'], 'second.pdf', { type: 'application/pdf' });
+    let resolveSummary!: (summary: PlanSummary) => void;
+    const pendingSummary = new Promise<PlanSummary>(resolve => {
+      resolveSummary = resolve;
+    });
+    const changedFileApp = new AppComponent(() => pendingSummary);
+    changedFileApp.planPdf.set(originalFile);
+    const changedFileRequest = changedFileApp.generateEstimate();
+    changedFileApp.planPdf.set(replacementFile);
+    resolveSummary({ totalAreaSqFt: 900, floors: 2 });
+    await changedFileRequest;
+    expect(changedFileApp.planEstimate()).toBeNull();
+
+    let rejectSummary!: (error: Error) => void;
+    const pendingError = new Promise<PlanSummary>((_, reject) => {
+      rejectSummary = reject;
+    });
+    const removedFileApp = new AppComponent(() => pendingError);
+    removedFileApp.planPdf.set(originalFile);
+    const removedFileRequest = removedFileApp.generateEstimate();
+    removedFileApp.removePlanPdf();
+    rejectSummary(new PlanExtractionError('unreadable'));
+    await removedFileRequest;
+    expect(removedFileApp.planEstimate()).toBeNull();
+    expect(removedFileApp.estimateError()).toBe('');
+    expect(removedFileApp.isEstimating()).toBe(false);
   });
 
   it('updates, validates, totals, and resets material rates', () => {
@@ -109,6 +202,7 @@ describe('AppComponent', () => {
     app.brickType.set('cement');
     app.planPdf.set(new File(['plan'], 'plan.pdf', { type: 'application/pdf' }));
     app.planPdfError.set('some error');
+    app.planEstimate.set({ totalAreaSqFt: 1000, floors: 2 });
     app.resetForm();
     expect(app.plotAreaSft()).toBe(1200);
     expect(app.floors()).toBe(0);
@@ -116,7 +210,36 @@ describe('AppComponent', () => {
     expect(app.city()).toBe('');
     expect(app.planPdf()).toBeNull();
     expect(app.planPdfError()).toBe('');
+    expect(app.planEstimate()).toBeNull();
     expect(app.materialRates()).toEqual({ cement: 0, steel: 0, sand: 0, stone: 0, bricks: 0 });
+  });
+
+  describe('parsePlanText', () => {
+    it('reads the sample three-floor model area statement in square metres', () => {
+      expect(parsePlanText(`
+        AREA STATEMENT: TOTAL BUILT UP AREA - 104.76 SQM
+        PROPOSED GROUND FLOOR BUILT UP AREA - 34.92 SQM
+        PROPOSED FIRST FLOOR BUILT UP AREA - 34.92 SQM
+        PROPOSED SECOND FLOOR BUILT UP AREA - 34.92 SQM
+      `)).toEqual({ totalAreaSqFt: 1127.627255253492, floors: 3 });
+    });
+
+    it('sums per-floor areas when the plan has no total area statement', () => {
+      expect(parsePlanText(`
+        GROUND FLOOR BUILT UP AREA 400 SQFT
+        FIRST FLOOR BUILT UP AREA 350 SQFT
+      `)).toEqual({ totalAreaSqFt: 750, floors: 2 });
+    });
+
+    it('reports unreadable plans and missing area or floor labels', () => {
+      expect(() => parsePlanText('')).toThrowError(PlanExtractionError);
+      expect(() => parsePlanText('A house plan without an area statement')).toThrowError(
+        new PlanExtractionError('missing-floors')
+      );
+      expect(() => parsePlanText('GROUND FLOOR PLAN')).toThrowError(
+        new PlanExtractionError('missing-area')
+      );
+    });
   });
 
   it('reports a missing estimate rather than returning an invalid cost line', () => {

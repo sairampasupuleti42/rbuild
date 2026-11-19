@@ -54,7 +54,7 @@
   </header>
 
   <section class="grid gap-6 xl:grid-cols-[minmax(17rem,0.78fr)_minmax(0,1.55fr)]">
-    <form id="project-form" class="surface-panel project-panel h-fit" (submit)="$event.preventDefault()">
+    <form id="project-form" class="surface-panel project-panel h-fit" (ngSubmit)="generateEstimate()">
       <div class="panel-heading">
         <span class="section-kicker">{{ t('project') }}</span>
         <h2 class="section-title">{{ t('startBasics') }}</h2>
@@ -81,9 +81,9 @@
             class="field-control mt-2"
             type="number"
             min="1"
-            step="1"
+            step="any"
             [ngModel]="plotAreaSft()"
-            (ngModelChange)="plotAreaSft.set($event || 0)"
+            (ngModelChange)="updatePlotArea($event)"
             name="plotAreaSft">
         </div>
         <div>
@@ -95,7 +95,7 @@
             min="0"
             step="1"
             [ngModel]="floors()"
-            (ngModelChange)="floors.set($event || 1)"
+            (ngModelChange)="updateFloors($event)"
             name="floors">
         </div>
       </div>
@@ -147,7 +147,7 @@
         @if (planPdfError()) {
           <p class="plan-upload-error" role="alert">{{ planPdfError() }}</p>
         } @else {
-          <p class="plan-upload-note">{{ t('pdfLocalNote') }}</p>
+          <p class="plan-upload-note">{{ t('planPdfLocalNote') }}</p>
         }
       </div>
 
@@ -158,6 +158,14 @@
           <p class="built-area-value">{{ totalBuiltUpArea() | number }} <span>{{ t('sqFt') }}</span></p>
         </div>
       </div>
+      <button class="primary-button mt-4 w-full" type="submit" [disabled]="isEstimating()">
+        {{ isEstimating() ? t('generatingEstimate') : t('generateEstimate') }}
+      </button>
+      @if (estimateError()) {
+        <p class="plan-upload-error" role="alert">{{ estimateError() }}</p>
+      } @else if (planEstimate()) {
+        <p class="plan-upload-note" role="status">{{ t('planEstimateReady') }}</p>
+      }
     </form>
 
     <section aria-labelledby="estimate-heading">
@@ -168,7 +176,7 @@
           <p class="section-copy">{{ t('thumbRules') }}</p>
         </div>
         <div class="no-print flex gap-2">
-          <button class="secondary-button" type="button" (click)="resetForm()">{{ t('reset') }}</button>
+          <button class="secondary-button" type="button" (click)="resetForm()" [disabled]="isEstimating()">{{ t('reset') }}</button>
           <button class="primary-button" type="button" (click)="print()">{{ t('printEstimate') }}</button>
         </div>
       </div>
@@ -203,23 +211,23 @@
         <dl class="grid gap-3 sm:grid-cols-2 lg:grid-cols-5">
           <div>
             <dt>{{ t('referenceArea') }}</dt>
-            <dd>{{ estimationReference.referenceAreaSqFt | number }} sq. ft. ({{ estimationReference.floors }} floors)</dd>
+            <dd>{{ totalBuiltUpArea() | number:'1.0-1' }} sq. ft. ({{ floors() }} floors)</dd>
           </div>
           <div>
             <dt>{{ t('referenceReinforcement') }}</dt>
-            <dd>{{ estimationReference.reinforcementKg | number }} kg</dd>
+            <dd>{{ scaledReferenceParameters().reinforcementKg | number }} kg</dd>
           </div>
           <div>
             <dt>{{ t('referenceBrickMasonry') }}</dt>
-            <dd>{{ estimationReference.brickMasonryCum | number:'1.2-2' }} cum</dd>
+            <dd>{{ scaledReferenceParameters().brickMasonryCum | number:'1.2-2' }} cum</dd>
           </div>
           <div>
             <dt>{{ t('referencePlaster') }}</dt>
-            <dd>{{ estimationReference.plasterSqm | number:'1.2-2' }} sqm</dd>
+            <dd>{{ scaledReferenceParameters().plasterSqm | number:'1.2-2' }} sqm</dd>
           </div>
           <div>
             <dt>{{ t('referenceCost') }}</dt>
-            <dd>{{ estimationReference.totalCost | currency:'INR':'symbol':'1.0-0':'en-IN' }}</dd>
+            <dd>{{ scaledReferenceParameters().totalCost | currency:'INR':'symbol':'1.0-0':'en-IN' }}</dd>
           </div>
         </dl>
       </aside>
