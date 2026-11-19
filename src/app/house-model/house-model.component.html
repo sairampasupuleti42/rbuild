@@ -1,0 +1,163 @@
+<section class="surface-panel model-panel mt-8 sm:mt-10" aria-labelledby="model-heading">
+  <div class="model-panel-heading">
+    <div class="panel-heading">
+      <span class="section-kicker">{{ translate()('modelPreview') }}</span>
+      <h2 id="model-heading" class="section-title">{{ translate()('modelPreview') }}</h2>
+      <p class="section-copy">{{ translate()('modelPreviewCopy') }}</p>
+    </div>
+    <div class="model-controls no-print" aria-label="{{ translate()('modelView') }}">
+      <button type="button" class="model-view-button" [class.model-view-button-active]="modelView() === 'isometric'" (click)="setView('isometric')">{{ translate()('modelIsometric') }}</button>
+      <button type="button" class="model-view-button" [class.model-view-button-active]="modelView() === 'front'" (click)="setView('front')">{{ translate()('modelFront') }}</button>
+      <button type="button" class="model-view-button" [class.model-view-button-active]="modelView() === 'side'" (click)="setView('side')">{{ translate()('modelSide') }}</button>
+    </div>
+  </div>
+
+  <div class="model-layout">
+    <div class="model-viewport" [attr.data-view]="modelView()">
+      <svg class="house-model" viewBox="0 0 380 280" role="img" [attr.aria-label]="translate()('modelPreview')" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+          <linearGradient id="plasterFront" x1="0" y1="0" x2="1" y2=".2">
+            <stop offset="0" stop-color="#f4efe3"/>
+            <stop offset=".65" stop-color="#ddd5c5"/>
+            <stop offset="1" stop-color="#bbb2a2"/>
+          </linearGradient>
+          <linearGradient id="plasterSide" x1="0" y1="0" x2="1" y2="1">
+            <stop offset="0" stop-color="#aaa899"/>
+            <stop offset="1" stop-color="#74766d"/>
+          </linearGradient>
+          <linearGradient id="glass" x1="0" y1="0" x2="1" y2="1">
+            <stop offset="0" stop-color="#a8d4dc"/>
+            <stop offset=".5" stop-color="#4e7f8b"/>
+            <stop offset="1" stop-color="#1d3e49"/>
+          </linearGradient>
+          <linearGradient id="timber" x1="0" y1="0" x2="1" y2="0">
+            <stop offset="0" stop-color="#725036"/>
+            <stop offset=".5" stop-color="#b27b4d"/>
+            <stop offset="1" stop-color="#62422e"/>
+          </linearGradient>
+          <linearGradient id="concrete" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0" stop-color="#d9d3c5"/>
+            <stop offset="1" stop-color="#9f9b91"/>
+          </linearGradient>
+          <linearGradient id="yard" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0" stop-color="#91a778"/>
+            <stop offset="1" stop-color="#657d54"/>
+          </linearGradient>
+          <filter id="buildingShadow" x="-20%" y="-20%" width="140%" height="150%">
+            <feDropShadow dx="10" dy="13" stdDeviation="9" flood-color="#06131b" flood-opacity=".42"/>
+          </filter>
+          <pattern id="brickJoints" width="12" height="6" patternUnits="userSpaceOnUse">
+            <rect width="12" height="6" fill="#a7a493"/>
+            <path d="M0 5.5H12" stroke="#777869" stroke-width=".5"/>
+            <path d="M6 0V5.5" stroke="#777869" stroke-width=".35"/>
+          </pattern>
+        </defs>
+
+        <ellipse cx="194" cy="244" rx="150" ry="23" fill="#06131b" opacity=".32"/>
+        <polygon points="24,215 188,250 356,207 190,174" fill="#b6ae9b"/>
+        <polygon points="24,215 188,250 188,259 24,224" fill="#8f897a"/>
+        <polygon points="188,250 356,207 356,216 188,259" fill="#777b70"/>
+        <polygon points="30,208 188,239 338,202 188,171" fill="url(#yard)"/>
+        <polygon points="36,208 188,236 188,244 36,216" fill="#6f745f"/>
+        <polygon points="88,211 188,238 286,210 188,184" fill="#c7c2b5"/>
+        <polygon points="106,211 188,231 248,214 188,196" fill="#777c73"/>
+        <line x1="188" y1="196" x2="188" y2="231" stroke="#a9ac9d" stroke-width="1"/>
+        <line x1="120" y1="208" x2="268" y2="220" stroke="#a9ac9d" stroke-width="1"/>
+
+        <g filter="url(#buildingShadow)">
+          <polygon [attr.points]="'82,' + frontTop() + ' 222,' + frontTop() + ' 222,220 82,220'" fill="url(#plasterFront)" stroke="#9b978a" stroke-width="1.5"/>
+          <polygon [attr.points]="'222,' + frontTop() + ' 302,' + sideTop() + ' 302,183 222,220'" fill="url(#plasterSide)" stroke="#686b63" stroke-width="1.5"/>
+          <polygon [attr.points]="'82,' + frontTop() + ' 222,' + frontTop() + ' 222,' + (frontTop() + 10) + ' 82,' + (frontTop() + 10)" fill="#3f4642" stroke="#262d2b" stroke-width="1"/>
+          <polygon [attr.points]="'222,' + frontTop() + ' 302,' + sideTop() + ' 302,' + (sideTop() + 10) + ' 222,' + (frontTop() + 10)" fill="#343936" stroke="#262d2b" stroke-width="1"/>
+          <polygon [attr.points]="'70,' + (frontTop() - 8) + ' 162,' + (frontTop() - 38) + ' 314,' + sideTop() + ' 222,' + frontTop()" fill="url(#concrete)" stroke="#85867f" stroke-width="2"/>
+          <polygon [attr.points]="'70,' + (frontTop() - 8) + ' 222,' + frontTop() + ' 222,' + (frontTop() + 4) + ' 70,' + (frontTop() + 4)" fill="#ece8dc" stroke="#9b978a" stroke-width="1"/>
+          <polygon [attr.points]="'222,' + frontTop() + ' 314,' + sideTop() + ' 314,' + (sideTop() + 12) + ' 222,' + (frontTop() + 4)" fill="#a9a99d" stroke="#77796f" stroke-width="1"/>
+          <rect x="82" [attr.y]="frontTop()" width="22" height="228" fill="#cfc7b7" opacity=".55"/>
+          <rect x="210" [attr.y]="frontTop()" width="12" height="228" fill="#77796f" opacity=".5"/>
+        </g>
+
+        @if (floorIndexes().length >= 2) {
+          <polygon [attr.points]="'82,' + (220 - modelFloorHeight) + ' 222,' + (220 - modelFloorHeight) + ' 222,' + (230 - modelFloorHeight) + ' 82,' + (230 - modelFloorHeight)" fill="#ded8c9" stroke="#aaa696" stroke-width="1"/>
+        }
+        @if (floorIndexes().length >= 3) {
+          <polygon [attr.points]="'82,' + (220 - 2 * modelFloorHeight) + ' 222,' + (220 - 2 * modelFloorHeight) + ' 222,' + (230 - 2 * modelFloorHeight) + ' 82,' + (230 - 2 * modelFloorHeight)" fill="#ded8c9" stroke="#aaa696" stroke-width="1"/>
+        }
+
+        <rect x="128" y="176" width="48" height="44" rx="1" fill="url(#timber)" stroke="#503928" stroke-width="2"/>
+        <rect x="134" y="182" width="36" height="38" fill="#8d603c"/>
+        <rect x="137" y="185" width="30" height="32" fill="#5f422f"/>
+        <circle cx="160" cy="201" r="1.8" fill="#d1b98b"/>
+        <rect x="119" y="220" width="66" height="6" fill="#dad4c6" stroke="#989486" stroke-width="1"/>
+        <rect x="116" y="226" width="72" height="5" fill="#c9c3b4" stroke="#989486" stroke-width="1"/>
+        <rect x="112" y="231" width="80" height="5" fill="#b8b2a4" stroke="#989486" stroke-width="1"/>
+
+        <rect x="88" y="146" width="48" height="40" rx="1" fill="#1a343e" stroke="#d4d0c2" stroke-width="3"/>
+        <rect x="92" y="150" width="40" height="32" fill="url(#glass)"/>
+        <line x1="112" y1="150" x2="112" y2="182" stroke="#d1d7d2" stroke-width="2"/>
+        <line x1="92" y1="166" x2="132" y2="166" stroke="#d1d7d2" stroke-width="1.5"/>
+        <polygon points="96,153 112,153 112,166 96,166" fill="#d6edf0" opacity=".25"/>
+        <rect x="198" y="148" width="14" height="42" fill="#64675f"/>
+        <rect x="198" y="148" width="14" height="42" fill="url(#brickJoints)" opacity=".45"/>
+
+        @if (floorIndexes().length >= 2) {
+          <polygon [attr.points]="'90,' + (220 - modelFloorHeight) + ' 210,' + (220 - modelFloorHeight) + ' 210,' + (232 - modelFloorHeight) + ' 90,' + (232 - modelFloorHeight)" fill="#d8d2c3" stroke="#9e9a8d" stroke-width="1.5"/>
+          <rect x="100" [attr.y]="220 - modelFloorHeight + 10" width="42" height="31" fill="#1a343e" stroke="#cbd8d4" stroke-width="2"/>
+          <rect x="104" [attr.y]="220 - modelFloorHeight + 14" width="34" height="23" fill="url(#glass)"/>
+          <line x1="121" [attr.y1]="220 - modelFloorHeight + 14" x2="121" [attr.y2]="220 - modelFloorHeight + 37" stroke="#d1d7d2" stroke-width="1.5"/>
+          <rect x="152" [attr.y]="220 - modelFloorHeight + 10" width="42" height="31" fill="#1a343e" stroke="#cbd8d4" stroke-width="2"/>
+          <rect x="156" [attr.y]="220 - modelFloorHeight + 14" width="34" height="23" fill="url(#glass)"/>
+        }
+
+        @if (floorIndexes().length >= 3) {
+          <rect x="96" [attr.y]="220 - 2 * modelFloorHeight + 10" width="48" height="34" fill="#1a343e" stroke="#cbd8d4" stroke-width="2"/>
+          <rect x="101" [attr.y]="220 - 2 * modelFloorHeight + 15" width="38" height="24" fill="url(#glass)"/>
+          <rect x="156" [attr.y]="220 - 2 * modelFloorHeight + 10" width="42" height="34" fill="#1a343e" stroke="#cbd8d4" stroke-width="2"/>
+          <rect x="161" [attr.y]="220 - 2 * modelFloorHeight + 15" width="32" height="24" fill="url(#glass)"/>
+        }
+
+        <polygon [attr.points]="'232,' + (220 - modelFloorHeight + 22) + ' 286,' + (220 - modelFloorHeight - 7) + ' 286,' + (220 - modelFloorHeight + 18) + ' 232,' + (220 - modelFloorHeight + 47)" fill="url(#glass)" stroke="#d1d7d2" stroke-width="2"/>
+        <polygon points="224,182 286,160 286,166 224,188" fill="#3b4441"/>
+        <rect x="228" y="184" width="54" height="3" fill="#d2d0c5"/>
+        <line x1="238" y1="184" x2="238" y2="198" stroke="#5e6662" stroke-width="2"/>
+        <line x1="251" y1="180" x2="251" y2="194" stroke="#5e6662" stroke-width="2"/>
+        <line x1="264" y1="176" x2="264" y2="190" stroke="#5e6662" stroke-width="2"/>
+
+        <g>
+          <ellipse cx="58" cy="211" rx="21" ry="7" fill="#3d6344"/>
+          <ellipse cx="45" cy="201" rx="13" ry="25" fill="#587b4f"/>
+          <ellipse cx="63" cy="198" rx="15" ry="27" fill="#668c58"/>
+          <ellipse cx="51" cy="194" rx="9" ry="15" fill="#82a66d"/>
+          <rect x="49" y="211" width="18" height="12" fill="#8b7764"/>
+        </g>
+        <g>
+          <ellipse cx="326" cy="194" rx="15" ry="23" fill="#4f7748"/>
+          <ellipse cx="315" cy="202" rx="10" ry="18" fill="#6a9058"/>
+          <ellipse cx="337" cy="202" rx="10" ry="18" fill="#6a9058"/>
+          <rect x="316" y="204" width="20" height="9" fill="#8b7764"/>
+        </g>
+
+        @for (floor of floorIndexes(); track $index) {
+          <line [attr.x1]="82" [attr.x2]="222" [attr.y1]="220 - ($index + 1) * modelFloorHeight" [attr.y2]="220 - ($index + 1) * modelFloorHeight" stroke="#a39f92" stroke-width="1" opacity=".8"/>
+        }
+      </svg>
+    </div>
+
+    <aside class="model-details">
+      <dl>
+        <div>
+          <dt>{{ translate()('modelFootprint') }}</dt>
+          <dd>{{ footprintText() }}</dd>
+        </div>
+        <div>
+          <dt>{{ translate()('modelFloorCount') }}</dt>
+          <dd>{{ floorIndexes().length }}</dd>
+        </div>
+        <div>
+          <dt>{{ translate()('referenceArea') }}</dt>
+          <dd>{{ totalArea() | number:'1.0-0' }} sq. ft.</dd>
+        </div>
+      </dl>
+      <p class="model-concept-note">{{ translate()('modelConceptNote') }}</p>
+    </aside>
+  </div>
+</section>

@@ -2,6 +2,7 @@ import { Component, HostListener, signal, computed, Inject, InjectionToken } fro
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { extractPlanSummary, PlanExtractionError, PlanExtractionErrorCode, PlanSummary } from './plan-estimator';
+import { HouseModelComponent } from './house-model/house-model.component';
 
 type MaterialRateId = 'cement' | 'steel' | 'sand' | 'stone' | 'bricks';
 type Language = 'en' | 'te';
@@ -37,7 +38,7 @@ const translations: Record<Language, Record<string, string>> = {
     planDocument: 'Plan or model PDF',
     planDocumentCopy: 'Attach a text-searchable floor-plan PDF. Its area statement is read locally when you generate the estimate.',
     modelPreview: 'Example 3D house preview',
-    modelPreviewCopy: 'A conceptual model generated from the plan area and floor count. It is for visualization, not a construction drawing.',
+    modelPreviewCopy: 'A realistic architectural concept generated from the plan area and floor count. Review every dimension against an approved drawing.',
     modelFloorCount: 'Floors',
     modelFootprint: 'Footprint',
     modelView: 'View',
@@ -181,7 +182,7 @@ const translations: Record<Language, Record<string, string>> = {
     planDocument: 'ప్లాన్ లేదా మోడల్ PDF',
     planDocumentCopy: 'టెక్స్ట్ శోధించగల ఫ్లోర్ ప్లాన్ PDFను జోడించండి. అంచనా రూపొందించినప్పుడు దాని విస్తీర్ణ వివరాలు మీ బ్రౌజర్‌లోనే చదవబడతాయి.',
     modelPreview: 'ఉదాహరణ 3D ఇంటి ప్రివ్యూ',
-    modelPreviewCopy: 'ప్లాన్ విస్తీర్ణం మరియు అంతస్తుల ఆధారంగా రూపొందించిన ఊహాత్మక మోడల్. ఇది విజువలైజేషన్ కోసం మాత్రమే; నిర్మాణ డ్రాయింగ్ కాదు.',
+    modelPreviewCopy: 'ప్లాన్ విస్తీర్ణం మరియు అంతస్తుల ఆధారంగా రూపొందించిన వాస్తవిక ఆర్కిటెక్చరల్ కాన్సెప్ట్. ప్రతి కొలతను ఆమోదిత డ్రాయింగ్తో సరిచూడాలి.',
     modelFloorCount: 'అంతస్తులు',
     modelFootprint: 'పాదముద్ర',
     modelView: 'దృశ్యం',
@@ -408,7 +409,7 @@ interface MaterialCostLine {
 @Component({
   selector: 'app-root',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, HouseModelComponent],
   templateUrl: './app.component.html'
 })
 export class AppComponent {
