@@ -52,6 +52,8 @@ local requirements, and current supplier quotations.
 - Display an architectural concept for the active floor count and footprint
 - Switch between isometric, front, and side views
 - Show area, footprint, and floor-count details beside the model
+- Include an open-license architectural reference photo gallery
+- Link each reference to Wikimedia Commons and display creator/license details
 - Clearly identify the preview as a conceptual visualization rather than an
   approved construction drawing
 

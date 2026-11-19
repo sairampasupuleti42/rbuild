@@ -160,4 +160,25 @@
       <p class="model-concept-note">{{ translate()('modelConceptNote') }}</p>
     </aside>
   </div>
+
+  <div class="reference-gallery">
+    <div class="reference-gallery-heading">
+      <div>
+        <span class="section-kicker">{{ translate()('modelReferences') }}</span>
+        <h3 class="reference-gallery-title">{{ translate()('modelReferenceGallery') }}</h3>
+      </div>
+      <p>{{ translate()('modelReferenceCopy') }}</p>
+    </div>
+    <div class="reference-image-grid">
+      @for (image of referenceImages; track image.src) {
+        <a class="reference-image-card" [href]="image.source" target="_blank" rel="noopener noreferrer">
+          <img [src]="image.src" [alt]="image.title" loading="lazy">
+          <div class="reference-image-caption">
+            <strong>{{ image.title }}</strong>
+            <span>{{ image.credit }} · {{ image.license }}</span>
+          </div>
+        </a>
+      }
+    </div>
+  </div>
 </section>

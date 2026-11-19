@@ -24,7 +24,8 @@
               "src/manifest.webmanifest",
               "src/icon-192.png",
               "src/icon-512.png",
-              "src/sw.js"
+              "src/sw.js",
+              { "glob": "**/*", "input": "src/assets", "output": "assets" }
             ],
             "styles": ["src/styles.css"],
             "scripts": []

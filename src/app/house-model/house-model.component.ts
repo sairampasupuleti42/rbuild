@@ -17,6 +17,29 @@ export class HouseModelComponent {
   modelView = signal<HouseModelView>('isometric');
 
   readonly modelFloorHeight = 46;
+  readonly referenceImages = [
+    {
+      src: 'assets/house-references/palm-springs-modern.jpg',
+      title: 'Mid-century modern house',
+      credit: 'Wgreaves',
+      license: 'CC BY-SA 4.0',
+      source: 'https://commons.wikimedia.org/wiki/File:Mid-century_modern_house_in_Palm_Springs.jpg'
+    },
+    {
+      src: 'assets/house-references/bell-lane-modern.jpg',
+      title: 'Timber-frame modern house',
+      credit: 'Richard Webb',
+      license: 'CC BY-SA 2.0',
+      source: 'https://commons.wikimedia.org/wiki/File:Modern_architecture,_Bell_Lane_-_geograph.org.uk_-_1169903.jpg'
+    },
+    {
+      src: 'assets/house-references/marsden-house-modern.jpg',
+      title: 'Contemporary residential façade',
+      credit: 'Bob Harvey',
+      license: 'CC BY-SA 2.0',
+      source: 'https://commons.wikimedia.org/wiki/File:Modern_architecture_-_geograph.org.uk_-_5110717.jpg'
+    }
+  ];
 
   floorIndexes = () =>
     Array.from({ length: Math.min(5, Math.max(1, this.floors() || 1)) }, (_, index) => index);
